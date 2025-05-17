@@ -40,7 +40,7 @@ class AsteroidField(pygame.sprite.Sprite):
         # Gradually decrease spawn time (more frequent spawns)
         game_time = pygame.time.get_ticks() / 1000  # in seconds
         current_spawn_rate = min(
-            ASTEROID_SPAWN_RATE - (game_time / ASTEROID_SPAWN_RATE_INCREASE or 1),
+            ASTEROID_SPAWN_RATE - (game_time / (ASTEROID_SPAWN_RATE_INCREASE or 1)),
             ASTEROID_SPAWN_RATE
             )
         
