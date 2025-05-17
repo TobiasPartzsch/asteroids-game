@@ -30,7 +30,7 @@ Screen height: {SCREEN_HEIGHT}""")
     Player.containers = (updatable, drawable)
     Asteroid.containers = (asteroids, updatable, drawable)
     AsteroidField.containers = (updatable, )
-    Shot.containers = (updatable, drawable)
+    Shot.containers = (updatable, drawable, shots)
 
     player = Player(
     x = SCREEN_WIDTH / 2,
@@ -52,13 +52,22 @@ Screen height: {SCREEN_HEIGHT}""")
             for (idx1, a1) in enumerate(asteroids, 0):
                 # look forward
                 # Note: index access might be faster if performance becomes an issue
-                for (idx2, a2) in enumerate(asteroids[idx1 + 1::], idx1 + 1):
+                for (idx2, a2) in enumerate(list(asteroids)[idx1 + 1::], idx1 + 1):
                     if a1.check_collision(a2):
                         asteroids_to_kill.add(a1)
                         asteroids_to_kill.add(a2)
             for _ in asteroids_to_kill:
                 _.kill()
 
+        # shot collision
+        to_kill = set()
+        for asteroid in asteroids:
+            for shot in shots:
+                if asteroid.check_collision(shot):
+                    to_kill.add(asteroid)
+                    to_kill.add(shot)
+        for obj in to_kill:
+            obj.kill()
 
         # player collision
         for _ in asteroids:
