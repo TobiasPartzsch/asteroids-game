@@ -12,6 +12,17 @@ Screen width: {SCREEN_WIDTH}
 Screen height: {SCREEN_HEIGHT}""")
 
     (numpass, numfail) = pygame.init()
+    print(f"Initalized with {numpass} passes and {numfail} fails")
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    
+    # game loop
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return
+        screen.fill("black")
+
+        pygame.display.flip()
 
 
 if __name__ == "__main__":
