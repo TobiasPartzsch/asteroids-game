@@ -17,6 +17,7 @@ Screen height: {SCREEN_HEIGHT}""")
     
     clock = pygame.time.Clock()
     dt = 0
+    font = pygame.font.Font(None, 36)
 
     updatable = pygame.sprite.Group() # all the objects that can be updated
     drawable  = pygame.sprite.Group()# all the objects that can be drawn
@@ -30,7 +31,6 @@ Screen height: {SCREEN_HEIGHT}""")
     x = SCREEN_WIDTH / 2,
     y = SCREEN_HEIGHT / 2,
 )
-
     asteroid_field = AsteroidField()
 
     # game loop
@@ -44,6 +44,12 @@ Screen height: {SCREEN_HEIGHT}""")
         screen.fill("black")
         for _ in drawable:
             _.draw(screen)
+
+        game_time = pygame.time.get_ticks()
+        minutes = int(game_time) // 60
+        seconds = int(game_time) % 60
+        timer_text = font.render(f"Time: {minutes:02}:{seconds:02}", True, (255, 255, 255))
+        screen.blit(timer_text, (20, 20))  # Position in top-left corner
 
         pygame.display.flip()
         dt = clock.tick(60) / 1000
