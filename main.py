@@ -1,8 +1,7 @@
-# this allows us to use code from
-# the open-source pygame library
-# throughout this file
 import pygame
 
+from asteroid import Asteroid
+from asteroidfield import AsteroidField
 from constants import *
 from player import Player
 
@@ -21,12 +20,18 @@ Screen height: {SCREEN_HEIGHT}""")
 
     updatable = pygame.sprite.Group() # all the objects that can be updated
     drawable  = pygame.sprite.Group()# all the objects that can be drawn
+    asteroids = pygame.sprite.Group()# all asteroids
+
     Player.containers = (updatable, drawable)
+    Asteroid.containers = (asteroids, updatable, drawable)
+    AsteroidField.containers = (updatable, )
 
     player = Player(
     x = SCREEN_WIDTH / 2,
     y = SCREEN_HEIGHT / 2,
 )
+
+    asteroid_field = AsteroidField()
 
     # game loop
     while True:
