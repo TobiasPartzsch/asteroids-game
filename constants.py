@@ -7,6 +7,9 @@ ASTEROID_SPAWN_RATE = 0.8  # seconds
 ASTEROID_SPAWN_RATE_INCREASE = 0  # divisor for current time, default 60 no increase if 0
 ASTEROID_MAX_RADIUS = ASTEROID_MIN_RADIUS * ASTEROID_SIZES
 ASTEROID_COLLISION = False
+ASTEROID_SPLIT_SPEEDUP = 1.2  # multiplier for speed when asteroids are split
+ASTEROID_SPLIT_DIRECTIONS = (-1, 0, 1)  # 3-way split
+ASTEROID_SPLIT_ANGLE = (20, 50)  # Min and max angle in degrees
 
 PLAYER_RADIUS = 20
 PLAYER_TURN_SPEED = 300

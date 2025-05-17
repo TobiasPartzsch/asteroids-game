@@ -60,14 +60,17 @@ Screen height: {SCREEN_HEIGHT}""")
                 _.kill()
 
         # shot collision
-        to_kill = set()
+        asteroids_to_split = set()
+        shots_to_kill = set()
         for asteroid in asteroids:
             for shot in shots:
                 if asteroid.check_collision(shot):
-                    to_kill.add(asteroid)
-                    to_kill.add(shot)
-        for obj in to_kill:
-            obj.kill()
+                    asteroids_to_split.add(asteroid)
+                    shots_to_kill.add(shot)
+        for _ in asteroids_to_split:
+            _.split()
+        for _ in shots_to_kill:
+            _.kill()
 
         # player collision
         for _ in asteroids:
