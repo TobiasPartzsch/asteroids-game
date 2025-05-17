@@ -1,3 +1,5 @@
+import sys
+
 import pygame
 
 from asteroid import Asteroid
@@ -40,6 +42,25 @@ Screen height: {SCREEN_HEIGHT}""")
                 return
         for _ in updatable:
             _.update(dt)
+
+        # asteroid collision
+        if ASTEROID_COLLISION:
+            asteroids_to_kill = set()
+            for (idx1, a1) in enumerate(asteroids, 0):
+                # look forward
+                # Note: index access might be faster if performance becomes an issue
+                for (idx2, a2) in enumerate(asteroids[idx1 + 1::], idx1 + 1):
+                    if a1.check_collision(a2):
+                        asteroids_to_kill.add(a1)
+                        asteroids_to_kill.add(a2)
+            for _ in asteroids_to_kill:
+                _.kill()
+
+
+        # player collision
+        for _ in asteroids:
+            if _.check_collision(player):
+                sys.exit("Game over!")
 
         screen.fill("black")
         for _ in drawable:
