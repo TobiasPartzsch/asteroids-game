@@ -2,7 +2,9 @@ import random
 import pygame
 
 from circleshape import CircleShape
+from collision_types import CollisionBehaviour
 from constants import ASTEROID_MIN_RADIUS, ASTEROID_SPLIT_ANGLE, ASTEROID_SPLIT_DIRECTIONS, ASTEROID_SPLIT_SPEEDUP
+from physics import bounce_asteroids
 
 
 class Asteroid(CircleShape):
@@ -35,3 +37,21 @@ class Asteroid(CircleShape):
             a.velocity = self.velocity.copy()
             a.velocity *= ASTEROID_SPLIT_SPEEDUP
             a.velocity = a.velocity.rotate(angle * direction)
+            offset = a.velocity.normalize() * new_radius * 3
+            print(f"offset for splitting: {offset}")
+            a.position += offset
+
+
+    def bounce_with(self, other):
+        bounce_asteroids(self, other)
+
+    def handle_collision(self, other_asteroid, behavior=CollisionBehaviour.DELETE):
+        # Dictionary mapping behaviors to methods
+        behaviors = {
+            CollisionBehaviour.DELETE: lambda: (self.kill(), other_asteroid.kill()),
+            CollisionBehaviour.SPLIT: lambda: (self.split(), other_asteroid.split()),
+            CollisionBehaviour.BOUNCE: lambda: self.bounce_with(other_asteroid)
+        }
+        
+        # Execute the selected behavior
+        behaviors[behavior]()

@@ -1,8 +1,9 @@
+from itertools import chain
 import sys
 
 import pygame
 
-from asteroid import Asteroid
+from asteroid_sprite import Asteroid
 from asteroidfield import AsteroidField
 from constants import *
 from player import Player
@@ -46,18 +47,27 @@ Screen height: {SCREEN_HEIGHT}""")
         for _ in updatable:
             _.update(dt)
 
+        game_time = pygame.time.get_ticks() / 1000
+        minutes = int(game_time) // 60
+        seconds = int(game_time) % 60
+
         # asteroid collision
+        asteroid_list = asteroids.sprites()
         if ASTEROID_COLLISION:
-            asteroids_to_kill = set()
+            colliding_asteroids = set()
             for (idx1, a1) in enumerate(asteroids, 0):
                 # look forward
                 # Note: index access might be faster if performance becomes an issue
-                for (idx2, a2) in enumerate(list(asteroids)[idx1 + 1::], idx1 + 1):
+                for (idx2, a2) in enumerate(asteroid_list[idx1 + 1::], idx1 + 1):
                     if a1.check_collision(a2):
-                        asteroids_to_kill.add(a1)
-                        asteroids_to_kill.add(a2)
-            for _ in asteroids_to_kill:
-                _.kill()
+                        colliding_asteroids.add((a1, a2))
+            for (a1, a2) in colliding_asteroids:
+                    a1.handle_collision(a2, ASTEROID_ON_COLLISION)
+            else:
+                asteroids_to_process = set(chain(*colliding_asteroids))
+                for _ in asteroids_to_process:
+                    _.kill()
+
 
         # shot collision
         asteroids_to_split = set()
@@ -75,15 +85,12 @@ Screen height: {SCREEN_HEIGHT}""")
         # player collision
         for _ in asteroids:
             if _.check_collision(player):
-                sys.exit("Game over!")
+                sys.exit(f"Game over! You lasted {minutes:02}:{seconds:02}")
 
         screen.fill("black")
         for _ in drawable:
             _.draw(screen)
 
-        game_time = pygame.time.get_ticks()
-        minutes = int(game_time) // 60
-        seconds = int(game_time) % 60
         timer_text = font.render(f"Time: {minutes:02}:{seconds:02}", True, (255, 255, 255))
         screen.blit(timer_text, (20, 20))  # Position in top-left corner
 

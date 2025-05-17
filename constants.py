@@ -1,15 +1,20 @@
+from collision_types import CollisionBehaviour
+
+
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 
 ASTEROID_MIN_RADIUS = 20
 ASTEROID_SIZES = 3
 ASTEROID_SPAWN_RATE = 0.8  # seconds
-ASTEROID_SPAWN_RATE_INCREASE = 0  # divisor for current time, default 60 no increase if 0
+ASTEROID_SPAWN_RATE_INCREASE = 1  # divisor for current time, default 60, no increase if 0
 ASTEROID_MAX_RADIUS = ASTEROID_MIN_RADIUS * ASTEROID_SIZES
-ASTEROID_COLLISION = False
+ASTEROID_COLLISION = True
 ASTEROID_SPLIT_SPEEDUP = 1.2  # multiplier for speed when asteroids are split
-ASTEROID_SPLIT_DIRECTIONS = (-1, 0, 1)  # 3-way split
+ASTEROID_SPLIT_DIRECTIONS = (-1, 1)  # 2-way split
 ASTEROID_SPLIT_ANGLE = (20, 50)  # Min and max angle in degrees
+ASTEROID_ON_COLLISION = CollisionBehaviour.DELETE  # ASTEROID_COLLISION needs to be True
+ASTEROID_COLLISION_OVERLAP = 2
 
 PLAYER_RADIUS = 20
 PLAYER_TURN_SPEED = 300
