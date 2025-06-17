@@ -21,13 +21,29 @@ class CircleShape(pygame.sprite.Sprite):
         """
         super().__init__(*self.containers)
 
-        self.position: pygame.Vector2 = start_position
+        self._position: pygame.Vector2 = start_position
         self.velocity: pygame.Vector2 = pygame.Vector2(0, 0)  # velocity in pixels per second
         self.radius: float = radius
 
+        self.rect = pygame.Rect(
+                    start_position.x - radius,
+                    start_position.y - radius, 
+                    radius * 2,
+                    radius * 2
+                )
+
         # TODO: stubs for future use and to satisfy typechecking
-        self.rect: Optional[pygame.Rect] = None
         self.image: Optional[pygame.Surface] = None
+
+    @property
+    def position(self) -> pygame.Vector2:
+        return self._position
+    
+    @position.setter
+    def position(self, value: pygame.Vector2) -> None:
+        self._position = value
+        # Automatically update rect when position changes
+        self.rect.center = (int(value.x), int(value.y))
 
     def draw(self, screen: pygame.Surface) -> None:
         """Handles how we draw the circular shape on the screen/surface.
