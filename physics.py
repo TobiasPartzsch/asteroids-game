@@ -1,7 +1,19 @@
+# In physics.py
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from asteroid_sprite import Asteroid
+
 import pygame
 
 
-def bounce_asteroids(asteroid1, asteroid2):
+def bounce_asteroids(asteroid1: "Asteroid", asteroid2: "Asteroid") -> None:
+    """Change the trajectory (velocity vector) of two asteroids so that they bounce away from each other.
+
+    Args:
+        asteroid1 (Asteroid): An asteroid that shall bounce away.
+        asteroid2 (Asteroid): Another asteroid that shall bounce away.
+    """
     # Calculate collision normal (direction from asteroid1 to asteroid2)
     normal = pygame.math.Vector2(
         asteroid2.position.x - asteroid1.position.x,

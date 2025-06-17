@@ -1,39 +1,66 @@
 import pygame
 
 from circleshape import CircleShape
-from constants import PLAYER_RADIUS, PLAYER_SHOOT_COOLDOWN, PLAYER_SPEED, PLAYER_TURN_SPEED, SHOT_SPEED
+from constants import PLAYER_RADIUS, PLAYER_SHOOT_COOLDOWN, PLAYER_SPEED, PLAYER_TURN_SPEED, SHOT_RADIUS, SHOT_SPEED
 from shot import Shot
 
 class Player(CircleShape):
-    def __init__(self, x, y):
-        super().__init__(x, y, PLAYER_RADIUS)
-        self.rotation = 0
-        self.shot_timer = 0
+    def __init__(self, start_position: pygame.Vector2) -> None:
+        super().__init__(start_position, PLAYER_RADIUS)
+        self.rotation: float = 0.0  # current rotation in degrees. up is 0
+        self.shot_timer: float = 0.0
 
-    def triangle(self):
+    def triangle(self) -> tuple[pygame.Vector2, pygame.Vector2, pygame.Vector2]:
+        """Calculate the vertices of the triangle representing the player.
+
+        Returns:
+            tuple[pygame.Vector2, pygame.Vector2, pygame.Vector2]: Vertices of the triangle as 2-dimensional vectors.
+        """
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
         right = pygame.Vector2(0, 1).rotate(self.rotation + 90) * self.radius / 1.5
         a = self.position + forward * self.radius
         b = self.position - forward * self.radius - right
         c = self.position - forward * self.radius + right
-        return [a, b, c]
-    
-    def draw(self, screen):
+        return (a, b, c)
+
+    def draw(self, screen: pygame.Surface) -> None:
+        """Draw the player on the screen.
+
+        Args:
+            screen (pygame.Surface): Our game screen.
+        """
         pygame.draw.polygon(
-            screen,
+            surface=screen,
             color="white",
             points=self.triangle(),
             width=2,
         )
 
-    def rotate(self, dt):
+    def rotate(self, dt: float) -> None:
+        """
+        Rotate the player depending on passed time and the turn speed.
+
+        Args:
+            dt (float): time elapsed since the last frame in seconds
+        """
         self.rotation += PLAYER_TURN_SPEED * dt
 
-    def move(self, dt):
+    def move(self, dt: float) -> None:
+        """Move the player forward in the current direction
+
+        Args:
+            dt (float): time elapsed since the last frame in seconds
+        """
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
         self.position += forward * PLAYER_SPEED * dt
     
-    def update(self, dt):
+    def update(self, dt: float) -> None:
+        """Update our player depending on the passed time.
+        Handles rotation, movement and shooting.
+
+        Args:
+            dt (float): time elapsed since the last frame in seconds
+        """
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_a]:
@@ -49,14 +76,21 @@ class Player(CircleShape):
 
         self.shot_timer -= dt
 
-    def shoot(self):
+    def shoot(self) -> None:
+        """Shoots (creates a shot) if the gun isn't on cooldown."""
+        
         # guard check against the gun being on cooldown
         if self.shot_timer > 0:
             return
 
-        # create a shot
-        shot = Shot(*self.position)
-        shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * SHOT_SPEED
-        
+        # Calculate spawn position at the tip of the player
+        forward = pygame.Vector2(0, 1).rotate(self.rotation)
+        spawn_offset: float = self.radius + SHOT_RADIUS
+        spawn_position: pygame.Vector2 = self.position + forward * spawn_offset
+
+        # create a shot at the offset position
+        shot = Shot(spawn_position)
+        shot.velocity = forward * SHOT_SPEED
+
         # put the gun on cooldown
         self.shot_timer = PLAYER_SHOOT_COOLDOWN

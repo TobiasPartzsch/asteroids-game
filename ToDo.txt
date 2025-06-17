@@ -1,0 +1,86 @@
+Core improvements first:
+
+    Player screen boundaries (prevents frustrating off-screen deaths)
+    Asteroid cleanup when they leave screen
+    Spawn invulnerability (essential for the splitting mechanic)
+
+Then the fun stuff:
+
+    Configurable asteroid splitting (this sounds really cool!)
+    Multiple size levels with color-coded HP
+    Basic leaderboard (local storage or file-based)
+
+Polish features:
+
+    Powerups (speed boost, multi-shot, shield?)
+    Asteroid rebounds vs cleanup (could be another config option!)
+
+Your configurable design philosophy is spot-on. You could even create a simple config file where players can tweak:
+
+    Split count and angles
+    Color schemes for different HP levels
+    Spawn rates and patterns
+    Powerup frequencies
+
+Powerup ideas are solid:
+
+    Additional lives - classic and always appreciated
+    Beam weapons - could pierce through multiple asteroids
+    Split shots - fires multiple bullets in a spread pattern
+    Faster/bigger shots - simple but effective upgrades
+
+# Powerup constants
+POWERUP_SPAWN_CHANCE = 0.1  # Chance per destroyed asteroid
+POWERUP_DURATION = 10  # seconds for temporary powerups
+POWERUP_RADIUS = 15
+
+# Weapon upgrade constants  
+BEAM_DURATION = 0.5  # how long beam stays active
+SPLIT_SHOT_COUNT = 3
+SPLIT_SHOT_ANGLE = 15  # degrees between shots
+FAST_SHOT_MULTIPLIER = 1.5
+BIG_SHOT_RADIUS_MULTIPLIER = 2
+BIG_SHOT_DAMAGE = 2
+
+You could add constants like:
+
+POWERUP_ON_ASTEROID_KILL = True
+POWERUP_ON_ASTEROID_SPLIT = False  # probably want this off by default
+POWERUP_ON_TIMER = True
+POWERUP_TIMER_INTERVAL = 30  # seconds
+
+The asteroid-to-asteroid collision system sounds really cool! That spawn invulnerability issue you hit is exactly why you identified it as a core feature to implement first. Without it, you get cascading splits where asteroids immediately re-collide with their children.
+
+For asteroid collisions, you've got some fun options:
+
+    Splitting: Creates chain reactions and visual spectacle
+    Bouncing: More realistic physics, creates interesting movement patterns
+    Hybrid: Maybe larger asteroids split smaller ones, but similar sizes bounce?
+
+You could even make it configurable:
+
+ASTEROID_VS_ASTEROID_BEHAVIOUR = CollisionBehaviour.BOUNCE  # or SPLIT, DELETE, IGNORE
+ASTEROID_BOUNCE_ENERGY_LOSS = 0.8  # velocity multiplier after bounce
+
+The spawn invulnerability will solve your collision problems and open up a lot of these advanced mechanics. Have you thought about visual indicators for invulnerable objects? Maybe a flashing effect or different color?
+
+
+Naming Control Schemes:
+
+    Your new idea could be called:
+        "Mouse-aim and strafe controls"
+        "Twin-stick style" (if you allow both moving and aiming direction independently, common in arcade shooters)
+        "Mouse steering with strafing"
+        "Cursor-aim + WASD movement"
+        In classic shooter lingo: "Ship aims with mouse, moves with WASD"
+
+    The classic WASD-only one is often called:
+        "Tank controls" (if you rotate and move relative to facing direction)
+        "Rotate-and-move controls"
+        "Directional WASD" or "WASD turn-and-thrust"
+        Also referenced as "Asteroids-style controls" in homage to the original arcade game
+
+Summary Table:
+Scheme 	Typical Name(s)
+Mouse rotation + WASD 	"Mouse-aim and strafe", "Cursor-aim controls"
+WASD turn-and-thrust 	"Tank controls", "Asteroids-style", "Rotate-and-move"

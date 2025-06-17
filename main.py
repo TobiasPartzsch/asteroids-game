@@ -1,79 +1,76 @@
-from itertools import chain
 import sys
+from typing import Any, Set
 
 import pygame
 
 from asteroid_sprite import Asteroid
 from asteroidfield import AsteroidField
-from constants import *
+from constants import BACKGROUND_COLOUR, FPS, SCREEN_HEIGHT, SCREEN_WIDTH, TIMER_FONT, TIMER_FONT_SIZE
 from player import Player
 from shot import Shot
 
 
-def main():
-    print(f"""Starting Asteroids!
-Screen width: {SCREEN_WIDTH}
-Screen height: {SCREEN_HEIGHT}""")
+class Game:
+    """Main game class for Asteroids."""
 
-    (numpass, numfail) = pygame.init()
-    print(f"Initalized with {numpass} passes and {numfail} fails")
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    
-    clock = pygame.time.Clock()
-    dt = 0
-    font = pygame.font.Font(None, 36)
+    def __init__(self) -> None:
+        (numpass, numfail) = pygame.init()
+        print(f"Initalized with {numpass} passes and {numfail} fails")
+        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        pygame.display.set_caption("Asteroids")
+        self.timer_font = pygame.font.Font(TIMER_FONT, TIMER_FONT_SIZE)
+        self.clock = pygame.time.Clock()
+        self.running = True
+        self.load_assets()
 
-    updatable = pygame.sprite.Group() # all the objects that can be updated
-    drawable  = pygame.sprite.Group()# all the objects that can be drawn
-    asteroids = pygame.sprite.Group()# all asteroids
-    shots = pygame.sprite.Group()# all shots
+        self.updatable: pygame.sprite.Group[Any] = pygame.sprite.Group()  # all the objects that can be updated
+        self.drawable: pygame.sprite.Group[Any]  = pygame.sprite.Group()  # all the objects that can be drawn
+        self.asteroids: pygame.sprite.Group[Any] = pygame.sprite.Group()  # all asteroids
+        self.shots: pygame.sprite.Group[Any] = pygame.sprite.Group()  # all shots
 
-    Player.containers = (updatable, drawable)
-    Asteroid.containers = (asteroids, updatable, drawable)
-    AsteroidField.containers = (updatable, )
-    Shot.containers = (updatable, drawable, shots)
+        Player.containers = (self.updatable, self.drawable)
+        Asteroid.containers = (self.asteroids, self.updatable, self.drawable)
+        AsteroidField.containers = (self.updatable, )
+        Shot.containers = (self.updatable, self.drawable, self.shots)
 
-    player = Player(
-    x = SCREEN_WIDTH / 2,
-    y = SCREEN_HEIGHT / 2,
-)
-    asteroid_field = AsteroidField()
+        self.player = Player(
+            start_position=pygame.Vector2(
+                SCREEN_WIDTH / 2,
+                SCREEN_HEIGHT / 2,
+            )
+        )
+        self.asteroid_field = AsteroidField()
 
-    # game loop
-    while True:
+
+    def load_assets(self) -> None:
+        """Load images, sounds, and other assets."""
+        # TODO: load your sprites and sounds here, e.g.:
+        # self.ship_image = pygame.image.load("assets/ship.png").convert_alpha()
+        pass
+
+    def handle_events(self) -> None:
+        """
+        Process incoming events that control the abortion of the game.
+        Player controls are handled by Player.update().
+        """
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                return
-        for _ in updatable:
-            _.update(dt)
+                self.running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.running = False
+                # TODO: handle other keys (e.g. ship controls)
 
-        game_time = pygame.time.get_ticks() / 1000
-        minutes = int(game_time) // 60
-        seconds = int(game_time) % 60
-
-        # asteroid collision
-        asteroid_list = asteroids.sprites()
-        if ASTEROID_COLLISION:
-            colliding_asteroids = set()
-            for (idx1, a1) in enumerate(asteroids, 0):
-                # look forward
-                # Note: index access might be faster if performance becomes an issue
-                for (idx2, a2) in enumerate(asteroid_list[idx1 + 1::], idx1 + 1):
-                    if a1.check_collision(a2):
-                        colliding_asteroids.add((a1, a2))
-            for (a1, a2) in colliding_asteroids:
-                    a1.handle_collision(a2, ASTEROID_ON_COLLISION)
-            else:
-                asteroids_to_process = set(chain(*colliding_asteroids))
-                for _ in asteroids_to_process:
-                    _.kill()
-
-
+    def handle_collisions(self) -> None:
+        """
+        Handle collisions of asteroids with the player's shots, asteroids hitting the player
+        and optionally asteroids hitting each other
+        """
         # shot collision
-        asteroids_to_split = set()
-        shots_to_kill = set()
-        for asteroid in asteroids:
-            for shot in shots:
+        asteroids_to_split: Set[Asteroid] = set()
+        shots_to_kill: Set[Shot] = set()
+        for asteroid in self.asteroids:
+            for shot in self.shots:
                 if asteroid.check_collision(shot):
                     asteroids_to_split.add(asteroid)
                     shots_to_kill.add(shot)
@@ -83,20 +80,69 @@ Screen height: {SCREEN_HEIGHT}""")
             _.kill()
 
         # player collision
-        for _ in asteroids:
-            if _.check_collision(player):
+        for _ in self.asteroids:
+            if _.check_collision(self.player):
+                minutes, seconds = Game.game_time_min_sec()
                 sys.exit(f"Game over! You lasted {minutes:02}:{seconds:02}")
 
-        screen.fill("black")
-        for _ in drawable:
-            _.draw(screen)
+        # # optional asteroid collision with each other
+        # asteroid_list = self.asteroids.sprites()
+        # if ASTEROID_COLLISION_ENABLED:
+        #     colliding_asteroids: Set[Asteroid] = set()
+        #     for (idx1, a1) in enumerate(self.asteroids, 0):
+        #         # look forward
+        #         for a2 in asteroid_list[idx1 + 1::], idx1 + 1:
+        #             if a1.check_collision(a2):
+        #                 colliding_asteroids.add((a1, a2))
+        #     for (a1, a2) in colliding_asteroids:
+        #             a1.handle_collision(a2, ASTEROID_ON_COLLISION)
+        #     else:
+        #         asteroids_to_process = set(chain(*colliding_asteroids))
+        #         for _ in asteroids_to_process:
+        #             _.kill()
 
-        timer_text = font.render(f"Time: {minutes:02}:{seconds:02}", True, (255, 255, 255))
-        screen.blit(timer_text, (20, 20))  # Position in top-left corner
+    def update(self, dt: float) -> None:
+        """
+        Update game state.
+        Args:
+            dt: Time elapsed since last frame (in seconds).
+        """
+        for _ in self.updatable:
+            _.update(dt)
+
+    def draw(self) -> None:
+        """Draw everything to the screen."""
+        self.screen.fill(BACKGROUND_COLOUR)
+        for _ in self.drawable:
+            _.draw(self.screen)
+
+        minutes, seconds = Game.game_time_min_sec()
+        timer_text = self.timer_font.render(f"Time: {minutes:02}:{seconds:02}", True, (255, 255, 255))
+        self.screen.blit(timer_text, (20, 20))  # Position in top-left corner
 
         pygame.display.flip()
-        dt = clock.tick(60) / 1000
 
+    def run(self) -> None:
+        """Main loop: process events, update state, draw, repeat."""
+        while self.running:
+            dt = self.clock.tick(FPS) / 1000.0  # seconds since last frame
+            self.handle_events()
+            self.handle_collisions()
+            self.update(dt)
+            self.draw()
+        pygame.quit()
+
+    @staticmethod
+    def game_time_min_sec() -> tuple[int, int]:
+        game_time = pygame.time.get_ticks() / 1000
+        minutes = int(game_time) // 60
+        seconds = int(game_time) % 60
+        return minutes, seconds
+
+
+def main():
+    print(f"Starting Asteroids! {SCREEN_WIDTH}×{SCREEN_HEIGHT} @ {FPS} FPS")
+    Game().run()
 
 if __name__ == "__main__":
     main()

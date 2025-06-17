@@ -1,28 +1,71 @@
+from __future__ import annotations
+from typing import Any, ClassVar, Optional
+
 import pygame
+
 
 # Base class for game objects
 class CircleShape(pygame.sprite.Sprite):
+    """Our base circular shapes. We won't initialize them but use subclasses instead"""
+    containers: ClassVar[tuple[pygame.sprite.Group[Any], ...]] = ()
 
-    def __init__(self, x, y, radius):
-        # we will be using this later
-        if hasattr(self, "containers"):
-            super().__init__(self.containers)
-        else:
-            super().__init__()
+    def __init__(self, start_position: pygame.Vector2, radius: float) -> None:
+        """
+        Initialising a new circular shape.
+        Call super to initialize containers if defined in the class variable containers
+        and initialize position, velocity and radius.
 
-        self.position = pygame.Vector2(x, y)
-        self.velocity = pygame.Vector2(0, 0)
-        self.radius = radius
+        Args:
+            start_position (pygame.Vector2): starting position as a 2-dimensional vector
+            radius (float): radius of our circle shape
+        """
+        super().__init__(*self.containers)
 
-    def draw(self, screen):
-        # sub-classes must override
-        pass
+        self.position: pygame.Vector2 = start_position
+        self.velocity: pygame.Vector2 = pygame.Vector2(0, 0)  # velocity in pixels per second
+        self.radius: float = radius
 
-    def update(self, dt):
-        # sub-classes must override
-        pass
+        # TODO: stubs for future use and to satisfy typechecking
+        self.rect: Optional[pygame.Rect] = None
+        self.image: Optional[pygame.Surface] = None
 
-    def check_collision(self, other):
+    def draw(self, screen: pygame.Surface) -> None:
+        """Handles how we draw the circular shape on the screen/surface.
+        Has to be implemented by a subclass.
+
+        Args:
+            screen (pygame.Surface): A pygame surface.
+
+        Raises:
+            NotImplementedError: "Subclasses must override draw()."
+        """
+        _ = screen  # explicitly mark as unused
+        raise NotImplementedError("sub-classes must override")
+
+    def update(self, dt: float) -> None:
+        """Updates the inner state of our shape since the last update.
+        Has to be implemented by a subclass.
+
+        Args:
+            dt (float): Elapsed time in seconds.
+
+        Raises:
+            NotImplementedError: "Subclasses must override draw()."
+        """
+        _ = dt  # explicitly mark as unused
+        raise NotImplementedError("sub-classes must override")
+
+    def check_collision(self, other: "CircleShape") -> bool:
+        """Checks whether this circular shape hits another. (Borders it or overlaps.)
+        We mostly use the position, a 2-dimensional vector (`pygame.Vector2`) for that.
+        We may allow for some overlap if needed.
+
+        Args:
+            other (CircleShape): the other circular shape we might be colliding with
+
+        Returns:
+            bool: whether we are colliding or not
+        """
         # return self.position.distance_to(other.position) <= self.radius + other.radius
         # First check if there's a collision
         distance = (self.position - other.position).length()
