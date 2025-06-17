@@ -1,6 +1,6 @@
 from enum import Enum
 
-class GameColors(Enum):
+class GameColors(str, Enum):
     BACKGROUND = "black"
     FOREGROUND = "white"
     # Future colors ready to go:
