@@ -6,6 +6,7 @@ from circleshape import CircleShape
 from collision_types import CollisionBehaviour
 from settings.asteroids import MIN_RADIUS, SPLIT_ANGLE, SPLIT_DIRECTIONS, SPLIT_SPEEDUP
 from physics import bounce_asteroids
+from settings.display import SCREEN_HEIGHT, SCREEN_WIDTH
 
 
 class Asteroid(CircleShape):
@@ -37,6 +38,17 @@ class Asteroid(CircleShape):
             dt (float): Elapsed time in seconds since the last update.
         """
         self.position += self.velocity * dt
+
+        # Clean up if completely off-screen with buffer zone
+        buffer = self.radius + 50  # Extra tolerance
+        screen_rect = pygame.Rect(
+            -buffer,
+            -buffer,
+            SCREEN_WIDTH + 2*buffer, 
+            SCREEN_HEIGHT + 2*buffer,
+        )
+        if not self.rect.colliderect(screen_rect):
+            self.kill()
 
     def split(self) -> None:
         """Split ourselves and create a number of new smaller asteroids moving in random (within limits) directions.
