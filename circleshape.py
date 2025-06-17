@@ -70,20 +70,20 @@ class CircleShape(pygame.sprite.Sprite):
         # First check if there's a collision
         distance = (self.position - other.position).length()
         collision_detected = distance < (self.radius + other.radius)
-        
-        if collision_detected:
-            # Resolve position overlap
-            collision_normal = (self.position - other.position).normalize()
-            overlap = (self.radius + other.radius) - distance
+
+        # if collision_detected:
+        #     # Resolve position overlap
+        #     collision_normal = (self.position - other.position).normalize()
+        #     overlap = (self.radius + other.radius) - distance
             
-            if overlap > 0:
-                # Move asteroids apart along the collision normal
-                # Distribute the separation based on relative sizes
-                total_radius = self.radius + other.radius
-                self_ratio = other.radius / total_radius
-                other_ratio = self.radius / total_radius
+        #     if overlap > 0:
+        #         # Move asteroids apart along the collision normal
+        #         # Distribute the separation based on relative sizes
+        #         total_radius = self.radius + other.radius
+        #         self_ratio = other.radius / total_radius
+        #         other_ratio = self.radius / total_radius
                 
-                self.position += collision_normal * overlap * self_ratio
-                other.position -= collision_normal * overlap * other_ratio
-        
+        #         self.position += collision_normal * overlap * self_ratio
+        #         other.position -= collision_normal * overlap * other_ratio
+
         return collision_detected
