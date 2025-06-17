@@ -1,12 +1,14 @@
 import pygame
 
+import settings.player as player_settings
+import settings.shot as shot_settings
 from circleshape import CircleShape
-from constants import PLAYER_RADIUS, PLAYER_SHOOT_COOLDOWN, PLAYER_SPEED, PLAYER_TURN_SPEED, SHOT_RADIUS, SHOT_SPEED
 from shot import Shot
+
 
 class Player(CircleShape):
     def __init__(self, start_position: pygame.Vector2) -> None:
-        super().__init__(start_position, PLAYER_RADIUS)
+        super().__init__(start_position, player_settings.RADIUS)
         self.rotation: float = 0.0  # current rotation in degrees. up is 0
         self.shot_timer: float = 0.0
 
@@ -43,7 +45,7 @@ class Player(CircleShape):
         Args:
             dt (float): time elapsed since the last frame in seconds
         """
-        self.rotation += PLAYER_TURN_SPEED * dt
+        self.rotation += player_settings.TURN_SPEED * dt
 
     def move(self, dt: float) -> None:
         """Move the player forward in the current direction
@@ -52,7 +54,7 @@ class Player(CircleShape):
             dt (float): time elapsed since the last frame in seconds
         """
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
-        self.position += forward * PLAYER_SPEED * dt
+        self.position += forward * player_settings.SPEED * dt
     
     def update(self, dt: float) -> None:
         """Update our player depending on the passed time.
@@ -85,12 +87,12 @@ class Player(CircleShape):
 
         # Calculate spawn position at the tip of the player
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
-        spawn_offset: float = self.radius + SHOT_RADIUS
+        spawn_offset: float = self.radius + shot_settings.RADIUS
         spawn_position: pygame.Vector2 = self.position + forward * spawn_offset
 
         # create a shot at the offset position
         shot = Shot(spawn_position)
-        shot.velocity = forward * SHOT_SPEED
+        shot.velocity = forward * shot_settings.SPEED
 
         # put the gun on cooldown
-        self.shot_timer = PLAYER_SHOOT_COOLDOWN
+        self.shot_timer = player_settings.SHOOT_COOLDOWN

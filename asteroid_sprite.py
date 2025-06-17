@@ -4,7 +4,7 @@ import pygame
 
 from circleshape import CircleShape
 from collision_types import CollisionBehaviour
-from constants import ASTEROID_MIN_RADIUS, ASTEROID_SPLIT_ANGLE, ASTEROID_SPLIT_DIRECTIONS, ASTEROID_SPLIT_SPEEDUP
+from settings.asteroids import MIN_RADIUS, SPLIT_ANGLE, SPLIT_DIRECTIONS, SPLIT_SPEEDUP
 from physics import bounce_asteroids
 
 
@@ -46,15 +46,15 @@ class Asteroid(CircleShape):
         self.kill()
 
         # don't split minimal asteroids
-        if self.radius <= ASTEROID_MIN_RADIUS:
+        if self.radius <= MIN_RADIUS:
             return
 
-        angle = random.uniform(*ASTEROID_SPLIT_ANGLE)
-        new_radius = self.radius - ASTEROID_MIN_RADIUS
-        for direction in ASTEROID_SPLIT_DIRECTIONS:
+        angle = random.uniform(*SPLIT_ANGLE)
+        new_radius = self.radius - MIN_RADIUS
+        for direction in SPLIT_DIRECTIONS:
             a = Asteroid(self.position, new_radius)
             a.velocity = self.velocity.copy()
-            a.velocity *= ASTEROID_SPLIT_SPEEDUP
+            a.velocity *= SPLIT_SPEEDUP
             a.velocity = a.velocity.rotate(angle * direction)
             offset = a.velocity.normalize() * new_radius * 3
             # print(f"offset for splitting: {offset}")

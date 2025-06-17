@@ -1,7 +1,7 @@
 import pygame
 
 from circleshape import CircleShape
-from constants import SHOT_RADIUS
+from settings.shot import RADIUS
 
 
 class Shot(CircleShape):
@@ -12,7 +12,7 @@ class Shot(CircleShape):
         Args:
             start_position (pygame.Vector2): starting position as a 2-dimensional vector
         """
-        super().__init__(start_position, SHOT_RADIUS)
+        super().__init__(start_position, RADIUS)
 
     def draw(self, screen: pygame.Surface) -> None:
         """Shots are drawn as simple white circles on our screen.

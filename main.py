@@ -5,8 +5,8 @@ import pygame
 
 from asteroid_sprite import Asteroid
 from asteroidfield import AsteroidField
-from constants import BACKGROUND_COLOUR, FPS, SCREEN_HEIGHT, SCREEN_WIDTH, TIMER_FONT, TIMER_FONT_SIZE
 from player import Player
+from settings.display import FPS, SCREEN_HEIGHT, SCREEN_WIDTH, TIMER_FONT, TIMER_FONT_SIZE, GameColors
 from shot import Shot
 
 
@@ -112,7 +112,7 @@ class Game:
 
     def draw(self) -> None:
         """Draw everything to the screen."""
-        self.screen.fill(BACKGROUND_COLOUR)
+        self.screen.fill(GameColors.BACKGROUND)
         for _ in self.drawable:
             _.draw(self.screen)
 
