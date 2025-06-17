@@ -77,6 +77,7 @@ class Asteroid(CircleShape):
         # Dictionary mapping behaviours to methods
         # TODO: move to constants.py eventually. Maybe
         behaviours: dict[CollisionBehaviour, Callable[[], None]] = {
+            CollisionBehaviour.NOTHING: lambda: None,
             CollisionBehaviour.DELETE: lambda: do(self.kill, other_asteroid.kill),
             CollisionBehaviour.SPLIT: lambda: do(self.split, other_asteroid.split),
             CollisionBehaviour.BOUNCE: lambda: self.bounce_with(other_asteroid)
