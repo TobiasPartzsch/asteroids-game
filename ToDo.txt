@@ -84,3 +84,6 @@ Summary Table:
 Scheme 	Typical Name(s)
 Mouse rotation + WASD 	"Mouse-aim and strafe", "Cursor-aim controls"
 WASD turn-and-thrust 	"Tank controls", "Asteroids-style", "Rotate-and-move"
+
+
+Use a velocity vector in player instead of rotation float
