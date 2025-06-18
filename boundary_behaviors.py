@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any, Callable, NamedTuple, Union
+from typing import TYPE_CHECKING, Any, Callable, NamedTuple
 from enum import Enum, auto
 import pygame
 
@@ -7,11 +7,11 @@ if TYPE_CHECKING:
     from player import Player  # Only import for type checking
 
 from edge_functions import (
-    left_condition, right_condition, top_condition, bottom_condition,
-    left_edge_transfer, right_edge_transfer, top_edge_transfer, bottom_edge_transfer,
-    left_momentum_transfer, right_momentum_transfer, top_momentum_transfer, bottom_momentum_transfer,
-    left_trajectory_transfer, right_trajectory_transfer, top_trajectory_transfer, bottom_trajectory_transfer,
-    horizontal_bounce, vertical_bounce,
+    left_condition, right_condition, top_condition, bottom_condition,  # type: ignore
+    left_edge_transfer, right_edge_transfer, top_edge_transfer, bottom_edge_transfer,  # type: ignore
+    left_momentum_transfer, right_momentum_transfer, top_momentum_transfer, bottom_momentum_transfer,  # type: ignore
+    left_trajectory_transfer, right_trajectory_transfer, top_trajectory_transfer, bottom_trajectory_transfer,  # type: ignore
+    horizontal_bounce, vertical_bounce,  # type: ignore
 )
 from settings.display import SCREEN_HEIGHT, SCREEN_WIDTH
 import settings.player as player_settings
@@ -24,30 +24,25 @@ class BoundaryInfo(NamedTuple):
 
 class EdgeInfo(NamedTuple):
     edge_name: str  # "left", "right", "top", "bottom"
-    
-    def __getattr__(self, name: str) -> Union[
-        Callable[[pygame.Vector2, float], bool],      # condition functions
-        Callable[["Player"], None],                   # transfer functions  
-        Callable[[float], float]                      # bounce functions
-    ]:
-        """Dynamically find functions based on naming convention."""
-        # print(f"DEBUG: __getattr__ called with name='{name}', edge_name='{self.edge_name}'")
 
-        if name == 'condition':
-            return globals()[f"{self.edge_name}_condition"]
-        elif name.endswith('_transfer'):
-            transfer_type = name.removesuffix('_transfer')
-            return globals()[f"{self.edge_name}_{transfer_type}_transfer"]
-        elif name == 'bounce_rotation':
-            # Map edge to bounce type
-            bounce_map = {
-                'left': 'vertical_bounce',
-                'right': 'vertical_bounce', 
-                'top': 'horizontal_bounce',
-                'bottom': 'horizontal_bounce'
-            }
-            return globals()[bounce_map[self.edge_name]]
-        raise AttributeError(f"No such attribute: {name}")
+    def get_condition(self) -> Callable[[pygame.Vector2, float], bool]:
+        """Get the boundary condition function for this edge."""
+        return globals()[f"{self.edge_name}_condition"]
+    
+    def get_transfer(self, transfer_type: str) -> Callable[["Player"], None]:
+        """Get the transfer function for this edge and transfer type."""
+        return globals()[f"{self.edge_name}_{transfer_type}_transfer"]
+    
+    def get_bounce_rotation(self) -> Callable[[float], float]:
+        """Get the appropriate bounce function for this edge."""
+        bounce_map = {
+            'left': 'vertical_bounce',
+            'right': 'vertical_bounce', 
+            'top': 'horizontal_bounce',
+            'bottom': 'horizontal_bounce'
+        }
+        return globals()[bounce_map[self.edge_name]]
+
 
 class BoundaryEdge(Enum):
     LEFT = EdgeInfo("left")
@@ -56,7 +51,7 @@ class BoundaryEdge(Enum):
     BOTTOM = EdgeInfo("bottom")
 
     @property
-    def opposite(self):
+    def opposite(self) -> BoundaryEdge:
         return {
             BoundaryEdge.LEFT: BoundaryEdge.RIGHT,
             BoundaryEdge.RIGHT: BoundaryEdge.LEFT,
@@ -130,7 +125,8 @@ def handle_bounce(player: "Player", forward: pygame.Vector2, dt: float) -> None:
     # Collect all edges that would be hit
     hit_edges: set[BoundaryEdge] = set()  # Fixed type hint
     for edge in BoundaryEdge:
-        if edge.value.condition(new_position, player.radius):
+        condition_func = edge.value.get_condition()
+        if condition_func(new_position, player.radius):
             hit_edges.add(edge)
 
     if not hit_edges:
@@ -139,7 +135,8 @@ def handle_bounce(player: "Player", forward: pygame.Vector2, dt: float) -> None:
     else:
         # Handle collision - reflect rotation first
         for edge in hit_edges:
-            player.rotation = edge.value.bounce_rotation(player.rotation)
+            bounce_rotation_func = edge.value.get_bounce_rotation()
+            player.rotation = bounce_rotation_func(player.rotation)
         
         # NOW recalculate movement with the new rotation
         new_forward = pygame.Vector2(0, 1).rotate(player.rotation)
@@ -176,8 +173,9 @@ def _handle_boundary_transfer(
     method_name = behavior.name.removeprefix("WRAP_").lower() + "_transfer"
 
     for edge in BoundaryEdge:
-        if edge.value.condition(new_position, player.radius):
-            transfer_func = getattr(edge.value, method_name)
+        condition_func = edge.value.get_condition()
+        if condition_func(new_position, player.radius):
+            transfer_func = edge.value.get_transfer(method_name)
             transfer_func(player)
             break
     else:
