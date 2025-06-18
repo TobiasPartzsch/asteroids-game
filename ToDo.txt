@@ -87,3 +87,4 @@ WASD turn-and-thrust 	"Tank controls", "Asteroids-style", "Rotate-and-move"
 
 
 Use a velocity vector in player instead of rotation float
+Implement gravity
