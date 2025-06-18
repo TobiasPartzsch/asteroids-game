@@ -17,12 +17,25 @@ from settings.display import SCREEN_HEIGHT, SCREEN_WIDTH
 import settings.player as player_settings
 
 
+# Bounce function constants
+HORIZONTAL_BOUNCE = "horizontal_bounce"
+VERTICAL_BOUNCE = "vertical_bounce"
+
+# direction constants
+LEFT = 'left'
+RIGHT = "right"
+TOP = "top"
+BOTTOM = "bottom"
+
+
 class BoundaryInfo(NamedTuple):
+    """Information about a boundary behavior including its handler function."""
     name: str
     handler: Callable[["Player", pygame.Vector2, float], None]
 
 
 class EdgeInfo(NamedTuple):
+    """Information about a screen edge and factory methods for edge-specific functions."""
     edge_name: str  # "left", "right", "top", "bottom"
 
     def get_condition(self) -> Callable[[pygame.Vector2, float], bool]:
@@ -36,19 +49,21 @@ class EdgeInfo(NamedTuple):
     def get_bounce_rotation(self) -> Callable[[float], float]:
         """Get the appropriate bounce function for this edge."""
         bounce_map = {
-            'left': 'vertical_bounce',
-            'right': 'vertical_bounce', 
-            'top': 'horizontal_bounce',
-            'bottom': 'horizontal_bounce'
+            BoundaryEdge.LEFT: VERTICAL_BOUNCE,
+            BoundaryEdge.RIGHT: VERTICAL_BOUNCE, 
+            BoundaryEdge.TOP: HORIZONTAL_BOUNCE,
+            BoundaryEdge.BOTTOM: HORIZONTAL_BOUNCE,
         }
-        return globals()[bounce_map[self.edge_name]]
+        edge_enum = BoundaryEdge[self.edge_name.upper()]
+        return globals()[bounce_map[edge_enum]]
 
 
 class BoundaryEdge(Enum):
-    LEFT = EdgeInfo("left")
-    RIGHT = EdgeInfo("right") 
-    TOP = EdgeInfo("top")
-    BOTTOM = EdgeInfo("bottom")
+    """Enumeration of screen edges with their corresponding EdgeInfo."""
+    LEFT = EdgeInfo(LEFT)
+    RIGHT = EdgeInfo(RIGHT) 
+    TOP = EdgeInfo(TOP)
+    BOTTOM = EdgeInfo(BOTTOM)
 
     @property
     def opposite(self) -> BoundaryEdge:
@@ -61,6 +76,7 @@ class BoundaryEdge(Enum):
 
 
 class BoundaryBehavior(Enum):
+    """Enumeration of different boundary behaviors for player movement."""
     @staticmethod
     def _generate_next_value_(name: str, start: int, count: int, last_values: list[Any]) -> str:
         _ = start, count, last_values  # Acknowledge the parameters to avoid unused warnings
@@ -82,11 +98,12 @@ class BoundaryBehavior(Enum):
 
 
 def handle_pass_through(player: "Player", forward: pygame.Vector2, dt: float) -> None:
-    # Simply apply the movement, no boundary checks
+    """Allow movement off-screen without any boundary checks."""
     player.position += forward * player_settings.SPEED * dt
 
 
 def handle_clamp(player: "Player", forward: pygame.Vector2, dt: float) -> None:
+    """Move first, then constrain position to screen boundaries (smooth sliding)."""
     new_position = player.position + forward * player_settings.SPEED * dt
     new_position.x = max(player.radius, min(SCREEN_WIDTH - player.radius, new_position.x))
     new_position.y = max(player.radius, min(SCREEN_HEIGHT - player.radius, new_position.y))
@@ -94,6 +111,7 @@ def handle_clamp(player: "Player", forward: pygame.Vector2, dt: float) -> None:
 
 
 def handle_stick(player: "Player", forward: pygame.Vector2, dt: float) -> None:
+    """Move per-axis with boundary checks (more tactile feel)."""
     movement = forward * player_settings.SPEED * dt
 
     # Clamp current position first if already outside bounds
@@ -119,6 +137,7 @@ def handle_stick(player: "Player", forward: pygame.Vector2, dt: float) -> None:
 
 
 def handle_bounce(player: "Player", forward: pygame.Vector2, dt: float) -> None:
+    """Reflect player movement off screen boundaries."""
     movement = forward * player_settings.SPEED * dt
     new_position = player.position + movement
 
@@ -151,6 +170,7 @@ def handle_bounce(player: "Player", forward: pygame.Vector2, dt: float) -> None:
 
 
 def handle_check(player: "Player", forward: pygame.Vector2, dt: float) -> None:
+    """Validate movement before applying (all-or-nothing)."""
     new_position = player.position + forward * player_settings.SPEED * dt
     
     # Only move if the entire new position is within bounds
@@ -166,29 +186,37 @@ def _handle_boundary_transfer(
     dt: float,
     behavior: BoundaryBehavior
 ) -> None:
-    """Generic boundary handler that uses different transfer methods."""
+    """Generic boundary handler that uses different transfer methods for wrapping."""
     new_position = player.position + forward * player_settings.SPEED * dt
 
-    # Build method name from enum: WRAP_EDGE -> edge_transfer
-    method_name = behavior.name.removeprefix("WRAP_").lower() + "_transfer"
+    # Extract transfer type from enum: WRAP_EDGE -> edge
+    transfer_type = behavior.name.removeprefix("WRAP_").lower()  # "edge", "momentum", etc.
 
     for edge in BoundaryEdge:
         condition_func = edge.value.get_condition()
         if condition_func(new_position, player.radius):
-            transfer_func = edge.value.get_transfer(method_name)
+            transfer_func = edge.value.get_transfer(transfer_type)
             transfer_func(player)
             break
     else:
         player.position = new_position
 
+
 def handle_wrap_edge(player: "Player", forward: pygame.Vector2, dt: float) -> None:
+    """Wrap player using simple edge-to-edge transfer."""
     _handle_boundary_transfer(player, forward, dt, BoundaryBehavior.WRAP_EDGE)
 
+
 def handle_wrap_momentum(player: "Player", forward: pygame.Vector2, dt: float) -> None:
+    """Wrap player preserving velocity-based overshoot."""
     _handle_boundary_transfer(player, forward, dt, BoundaryBehavior.WRAP_MOMENTUM)
 
+
 def handle_wrap_trajectory(player: "Player", forward: pygame.Vector2, dt: float) -> None:
+    """Wrap player maintaining exact trajectory across the wrap."""
     _handle_boundary_transfer(player, forward, dt, BoundaryBehavior.WRAP_TRAJECTORY)
 
+
 def handle_wrap_relative(player: "Player", forward: pygame.Vector2, dt: float) -> None:
+    """Wrap player mapping position as percentage to opposite side."""
     _handle_boundary_transfer(player, forward, dt, BoundaryBehavior.WRAP_RELATIVE)
