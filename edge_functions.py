@@ -9,15 +9,7 @@ from settings.display import SCREEN_HEIGHT, SCREEN_WIDTH
 
 # Condition functions
 def left_condition(pos: pygame.Vector2, radius: float) -> bool:
-    """Check if position would exceed the left screen boundary.
-    
-    Args:
-        pos: Position to check for boundary violation
-        radius: Object radius for boundary buffer calculations
-        
-    Returns:
-        True if position is outside left boundary, False otherwise
-    """
+    """Check if position would exceed the left screen boundary."""
     return pos.x < radius
 
 def right_condition(pos: pygame.Vector2, radius: float) -> bool:

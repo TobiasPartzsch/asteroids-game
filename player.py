@@ -7,6 +7,14 @@ from shot import Shot
 
 
 class Player(CircleShape):
+    """Represents the player's ship in the game.
+    
+    The player is rendered as a triangle that can rotate, move, and shoot.
+    Movement behavior at screen boundaries is determined by the configured
+    BOUNDARY_BEHAVIOR setting.
+    
+    Inherits from CircleShape for collision detection purposes. We also keep a rectangle up to date to use pycharm functionality.
+    """
     def __init__(self, start_position: pygame.Vector2) -> None:
         super().__init__(start_position, player_settings.RADIUS)
         self.rotation: float = 0.0  # current rotation in degrees. down is 0
@@ -15,8 +23,13 @@ class Player(CircleShape):
     def triangle(self) -> tuple[pygame.Vector2, pygame.Vector2, pygame.Vector2]:
         """Calculate the vertices of the triangle representing the player.
 
+        Creates a triangle pointing in the player's current rotation direction.
+        The triangle consists of a forward point and two rear points forming
+        the classic "ship" shape.
+
         Returns:
-            tuple[pygame.Vector2, pygame.Vector2, pygame.Vector2]: Vertices of the triangle as 2-dimensional vectors.
+            tuple[pygame.Vector2, pygame.Vector2, pygame.Vector2]: The three vertices
+                of the triangle (forward point, rear-left, rear-right).
         """
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
         right = pygame.Vector2(0, 1).rotate(self.rotation + 90) * self.radius / 1.5
@@ -26,10 +39,13 @@ class Player(CircleShape):
         return (a, b, c)
 
     def draw(self, screen: pygame.Surface) -> None:
-        """Draw the player on the screen.
+        """Draw the player as a white triangle outline on the screen.
+        
+        The triangle points in the player's current rotation direction.
+        Uses a 2-pixel white outline for visibility.
 
         Args:
-            screen (pygame.Surface): Our game screen.
+            screen (pygame.Surface): The pygame surface to draw on.
         """
         pygame.draw.polygon(
             surface=screen,
@@ -39,29 +55,39 @@ class Player(CircleShape):
         )
 
     def rotate(self, dt: float) -> None:
-        """
-        Rotate the player depending on passed time and the turn speed.
+        """Rotate the player at the configured turn speed.
+        
+        Positive dt rotates clockwise, negative dt rotates counterclockwise.
+        The actual rotation amount is determined by TURN_SPEED setting.
 
         Args:
-            dt (float): time elapsed since the last frame in seconds
+            dt (float): Time elapsed since last frame. Can be negative for reverse rotation.
         """
         self.rotation += player_settings.TURN_SPEED * dt
 
     def move(self, dt: float) -> None:
-        """Move the player forward in the current direction
+        """Move the player forward in their current facing direction.
+        
+        Movement speed and boundary behavior are determined by player settings.
+        Negative dt values move the player backward.
 
         Args:
-            dt (float): time elapsed since the last frame in seconds
+            dt (float): Time elapsed since last frame. Can be negative for reverse movement.
         """
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
         player_settings.BOUNDARY_BEHAVIOR.get_handler()(self, forward, dt)
 
     def update(self, dt: float) -> None:
-        """Update our player depending on the passed time.
-        Handles rotation, movement and shooting.
+        """Update the player state based on keyboard input and elapsed time.
+        
+        Handles:
+        - A/D keys for rotation (left/right)
+        - W/S keys for movement (forward/backward) 
+        - Space key for shooting
+        - Shot cooldown timer countdown
 
         Args:
-            dt (float): time elapsed since the last frame in seconds
+            dt (float): Time elapsed since the last frame in seconds.
         """
         keys = pygame.key.get_pressed()
 
@@ -79,8 +105,14 @@ class Player(CircleShape):
         self.shot_timer -= dt
 
     def shoot(self) -> None:
-        """Shoots (creates a shot) if the gun isn't on cooldown."""
+        """Attempt to fire a shot from the player's position.
         
+        Creates a new Shot object at the tip of the player triangle, moving
+        in the player's current facing direction. Respects the cooldown timer
+        to prevent rapid-fire shooting.
+        
+        Does nothing if the gun is still on cooldown from the previous shot.
+        """
         # guard check against the gun being on cooldown
         if self.shot_timer > 0:
             return
