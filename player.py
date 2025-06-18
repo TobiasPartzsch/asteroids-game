@@ -9,7 +9,7 @@ from shot import Shot
 class Player(CircleShape):
     def __init__(self, start_position: pygame.Vector2) -> None:
         super().__init__(start_position, player_settings.RADIUS)
-        self.rotation: float = 0.0  # current rotation in degrees. up is 0
+        self.rotation: float = 0.0  # current rotation in degrees. down is 0
         self.shot_timer: float = 0.0
 
     def triangle(self) -> tuple[pygame.Vector2, pygame.Vector2, pygame.Vector2]:
@@ -54,8 +54,8 @@ class Player(CircleShape):
             dt (float): time elapsed since the last frame in seconds
         """
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
-        self.position += forward * player_settings.SPEED * dt
-    
+        player_settings.BOUNDARY_BEHAVIOR.get_handler()(self, forward, dt)
+
     def update(self, dt: float) -> None:
         """Update our player depending on the passed time.
         Handles rotation, movement and shooting.
