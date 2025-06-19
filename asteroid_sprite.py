@@ -25,6 +25,14 @@ class Asteroid(CircleShape):
 
     def draw(self, screen: pygame.Surface) -> None:
         """Draw asteroids as a simple circle with a white border."""
+        if self.invulnerable_timer > 0:
+            on_cycles, off_cycles = asteroids.INVULNERABILITY_BLINK_PATTERN
+            total_cycle = on_cycles + off_cycles
+            blink_cycles = self.invulnerable_timer * asteroids.INVULNERABILITY_BLINKING_PER_SECOND
+            cycle_position = int(blink_cycles) % total_cycle
+            if cycle_position < off_cycles:  # In the "off" part of the cycle
+                return  # Don't draw this frame
+
         # Calculate border width based on invulnerability
         border_width = asteroids.BORDER_WIDTH_NORMAL * (
             1 + asteroids.BORDER_WIDTH_INVULNERABLE_MULTIPLIER * (self.invulnerable_timer > 0)
