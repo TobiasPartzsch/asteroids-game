@@ -18,26 +18,40 @@ class Asteroid(CircleShape):
         CircleShape (_type_): Asteroids are circular shapes.
     """
 
-    def draw(self, screen: pygame.Surface) -> None:
-        """Draw asteroids as a simple circle with a white border. (For now.)
+    def __init__(self, position: pygame.Vector2, radius: float) -> None:
+        """Initialize asteroid with position, radius, and invulnerability timer."""
+        super().__init__(position, radius)
+        self.invulnerable_timer = asteroids.SPAWN_INVUL_TIME_IN_SEC
 
-        Args:
-            screen (pygame.Surface): our game screen to draw upon
-        """
+    def draw(self, screen: pygame.Surface) -> None:
+        """Draw asteroids as a simple circle with a white border."""
+        # Calculate border width based on invulnerability
+        border_width = asteroids.BORDER_WIDTH_NORMAL * (
+            1 + asteroids.BORDER_WIDTH_INVULNERABLE_MULTIPLIER * (self.invulnerable_timer > 0)
+        )
+
+        # Draw filled circle first
         pygame.draw.circle(
             screen,
-            color="white",
+            color=asteroids.FILL_COLOR,
             center=self.position,
             radius=self.radius,
-            width=2,
+        )
+
+        # Draw border on top
+        pygame.draw.circle(
+            screen,
+            color=asteroids.BORDER_COLOR,
+            center=self.position,
+            radius=self.radius,
+            width=border_width,
         )
 
     def update(self, dt: float) -> None:
-        """Update our state in the game. Currently only related to our position.
+        """Update our state in the game."""
+        if self.invulnerable_timer > 0:
+            self.invulnerable_timer -= dt
 
-        Args:
-            dt (float): Elapsed time in seconds since the last update.
-        """
         self.position += self.velocity * dt
 
         # Clean up if completely off-screen with buffer zone
