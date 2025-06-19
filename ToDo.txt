@@ -88,3 +88,6 @@ WASD turn-and-thrust 	"Tank controls", "Asteroids-style", "Rotate-and-move"
 
 Use a velocity vector in player instead of rotation float
 Implement gravity
+
+
+Implement more realistic asteroid splitting to preserve mass. Make the splitting behavior configurable like screen boundaries
