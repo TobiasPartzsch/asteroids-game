@@ -25,11 +25,15 @@ class Game:
 
         self.updatable: pygame.sprite.Group[Any] = pygame.sprite.Group()  # all the objects that can be updated
         self.drawable: pygame.sprite.Group[Any]  = pygame.sprite.Group()  # all the objects that can be drawn
-        self.asteroids: pygame.sprite.Group[Any] = pygame.sprite.Group()  # all asteroids
+        self.vulnerable_asteroids: pygame.sprite.Group[Any] = pygame.sprite.Group()  # vulnerable asteroids
+        self.invulnerable_asteroids: pygame.sprite.Group[Any] = pygame.sprite.Group()  # invulnerable asteroids
         self.shots: pygame.sprite.Group[Any] = pygame.sprite.Group()  # all shots
 
         Player.containers = (self.updatable, self.drawable)
-        Asteroid.containers = (self.asteroids, self.updatable, self.drawable)
+        Asteroid.containers = (
+            self.invulnerable_asteroids,  # start as invulnerable
+            self.updatable, self.drawable
+        )
         AsteroidField.containers = (self.updatable, )
         Shot.containers = (self.updatable, self.drawable, self.shots)
 
@@ -69,7 +73,7 @@ class Game:
         # shot collision
         asteroids_to_split: Set[Asteroid] = set()
         shots_to_kill: Set[Shot] = set()
-        for asteroid in self.asteroids:
+        for asteroid in self.vulnerable_asteroids:
             for shot in self.shots:
                 if asteroid.check_collision(shot):
                     asteroids_to_split.add(asteroid)
@@ -80,7 +84,7 @@ class Game:
             _.kill()
 
         # player collision
-        for _ in self.asteroids:
+        for _ in self.vulnerable_asteroids:
             if _.check_collision(self.player):
                 minutes, seconds = Game.game_time_min_sec()
                 sys.exit(f"Game over! You lasted {minutes:02}:{seconds:02}")
@@ -109,6 +113,11 @@ class Game:
         """
         for _ in self.updatable:
             _.update(dt)
+
+        for asteroid in self.invulnerable_asteroids.copy():  # copy() to avoid iteration issues
+            if asteroid.invulnerable_timer <= 0:
+                self.invulnerable_asteroids.remove(asteroid)
+                self.vulnerable_asteroids.add(asteroid)
 
     def draw(self) -> None:
         """Draw everything to the screen."""
