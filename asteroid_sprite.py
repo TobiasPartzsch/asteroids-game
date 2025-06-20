@@ -103,7 +103,6 @@ class Asteroid(CircleShape):
             self.kill()
 
     def kill(self):
-        print(f"KILLING asteroid at {self.position}")
         super().kill()
 
     def split(self) -> None:
