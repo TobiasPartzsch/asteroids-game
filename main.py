@@ -1,4 +1,5 @@
 import sys
+import time
 from typing import Any, Set
 
 import pygame
@@ -28,6 +29,11 @@ class Game:
         self.vulnerable_asteroids: pygame.sprite.Group[Any] = pygame.sprite.Group()  # vulnerable asteroids
         self.invulnerable_asteroids: pygame.sprite.Group[Any] = pygame.sprite.Group()  # invulnerable asteroids
         self.shots: pygame.sprite.Group[Any] = pygame.sprite.Group()  # all shots
+
+        # print(f"vulnerable_asteroids id: {id(self.vulnerable_asteroids)}")
+        # print(f"invulnerable_asteroids id: {id(self.invulnerable_asteroids)}")
+        # print(f"updatable id: {id(self.updatable)}")
+        # print(f"drawable id: {id(self.drawable)}")
 
         Player.containers = (self.updatable, self.drawable)
         Asteroid.containers = (
@@ -78,14 +84,25 @@ class Game:
                 if asteroid.check_collision(shot):
                     asteroids_to_split.add(asteroid)
                     shots_to_kill.add(shot)
-        for _ in asteroids_to_split:
-            _.split()
         for _ in shots_to_kill:
             _.kill()
+        for _ in asteroids_to_split:
+            _.split()
+            asteroid_count = len(self.vulnerable_asteroids) + len(self.invulnerable_asteroids)
+            print(f"After split: drawable={len(self.drawable)}, asteroids={asteroid_count}")
+            # Debug: Check if any fragments were added multiple times
+            for sprite in self.updatable:
+                if hasattr(sprite, 'is_fragment') and sprite.is_fragment:
+                    count = sum(1 for s in self.updatable if s is sprite)
+                    if count > 1:
+                        print(f"DUPLICATE! Fragment {id(sprite)} appears {count} times in updatable!")
+                    else:
+                        print(f"Fragment {id(sprite)} appears {count} time in updatable (OK)")
 
         # player collision
-        for _ in self.vulnerable_asteroids:
-            if _.check_collision(self.player):
+        all_asteroids = list(self.vulnerable_asteroids) + list(self.invulnerable_asteroids)
+        for asteroid in all_asteroids:
+            if asteroid.check_collision(self.player):
                 minutes, seconds = Game.game_time_min_sec()
                 sys.exit(f"Game over! You lasted {minutes:02}:{seconds:02}")
 
@@ -111,11 +128,21 @@ class Game:
         Args:
             dt: Time elapsed since last frame (in seconds).
         """
-        for _ in self.updatable:
-            _.update(dt)
+        # print(f"About to call updatable.update(dt={dt}) on {len(self.updatable)} objects")
+        if not hasattr(self, 'main_update_count'):
+            self.main_update_count = 0
+            self.main_update_start_time = time.time()
+        
+        self.main_update_count += 1
+        elapsed = time.time() - self.main_update_start_time
+        print(f"MAIN UPDATE CALL #{self.main_update_count} at {elapsed:.3f}s")
+
+        self.updatable.update(dt)
+        # print(f"Finished updatable.update()")
 
         for asteroid in self.invulnerable_asteroids.copy():  # copy() to avoid iteration issues
             if asteroid.invulnerable_timer <= 0:
+                # print(f"TRANSFERRING asteroid {id(asteroid)} from invulnerable to vulnerable")
                 self.invulnerable_asteroids.remove(asteroid)
                 self.vulnerable_asteroids.add(asteroid)
 
@@ -133,11 +160,17 @@ class Game:
 
     def run(self) -> None:
         """Main loop: process events, update state, draw, repeat."""
+        frame_count = 0
+        start_time = time.time()
+
         while self.running:
             dt = self.clock.tick(FPS) / 1000.0  # seconds since last frame
+            current_time = time.time() - start_time
+            frame_count += 1
+            print(f"FRAME #{frame_count} at {current_time:.3f}s: dt={dt:.6f}s")
             self.handle_events()
-            self.handle_collisions()
             self.update(dt)
+            self.handle_collisions()
             self.draw()
         pygame.quit()
 
