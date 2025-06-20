@@ -5,7 +5,7 @@ import pygame
 import random
 
 from asteroid_sprite import Asteroid
-from settings.asteroids import MAX_RADIUS, MIN_RADIUS, SIZES, SPAWN_RATE, SPAWN_RATE_INCREASE
+from settings.asteroids import MAX_RADIUS, MIN_RADIUS, SIZES, SPAWN_RATE_GROWTH, STARTING_SPEED_SPREAD
 from settings.display import SCREEN_HEIGHT, SCREEN_WIDTH
 
 
@@ -53,6 +53,7 @@ class AsteroidField(pygame.sprite.Sprite):
         """
         asteroid = Asteroid(position, radius)
         asteroid.velocity = velocity
+        asteroid.initial_speed = velocity.length()
 
     def update(self, dt: float) -> None:
         """Potentially spawn new asteroids and keep increasing spawn rate if configured.
@@ -62,17 +63,20 @@ class AsteroidField(pygame.sprite.Sprite):
         """
         # print(f"ASTEROID UPDATE CALLED: {id(self)}")
         game_time = pygame.time.get_ticks() / 1000  # in seconds
-        # No division by zero, and only decrease if SPAWN_RATE_INCREASE > 0
-        adjustment = (game_time / SPAWN_RATE_INCREASE) if SPAWN_RATE_INCREASE > 0 else 0
-        current_spawn_rate = max(SPAWN_RATE - adjustment, SPAWN_RATE)
-        
+        spawn_rate_per_sec = SPAWN_RATE_GROWTH.function_type.calculate_multiplier(
+            SPAWN_RATE_GROWTH.coefficients, game_time
+        )
+        if spawn_rate_per_sec <= 0:
+            raise ValueError(f"Calculated spawn rate of {spawn_rate_per_sec} isn't plausible.")
+        spawn_inveral_sec = 1 / spawn_rate_per_sec
+
         self.spawn_timer += dt
-        if self.spawn_timer > current_spawn_rate:
+        if self.spawn_timer > spawn_inveral_sec:
             self.spawn_timer = 0
 
             # spawn a new asteroid at a random edge
             edge = random.choice(self.edges)
-            speed = random.randint(40, 100)
+            speed = random.randint(*STARTING_SPEED_SPREAD)
             velocity = edge[0] * speed
             velocity = velocity.rotate(random.randint(-30, 30))
             position = edge[1](random.uniform(0, 1))

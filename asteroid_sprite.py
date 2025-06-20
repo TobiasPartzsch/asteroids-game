@@ -1,6 +1,6 @@
 import random
 import time
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 
 import pygame
 
@@ -31,6 +31,9 @@ class Asteroid(CircleShape):
         # Color based on object ID
         colors = ["white", "red", "green", "blue", "yellow", "cyan", "magenta"]
         self.debug_color = colors[id(self) % len(colors)]
+        self.fragmentation_counter = 0
+        self.initial_speed: Optional[float] = None
+
 
     def draw(self, screen: pygame.Surface) -> None:
         """Draw asteroids as a simple circle with a white border."""
@@ -128,6 +131,15 @@ class Asteroid(CircleShape):
         if self.invulnerable_timer > 0:
             self.invulnerable_timer -= dt
 
+        game_time = pygame.time.get_ticks() / 1000  # in seconds
+        updated_speed = (
+            (self.initial_speed or 0.0)
+            * asteroids.SPEED_GROWTH.function_type.calculate_multiplier(
+                asteroids.SPEED_GROWTH.coefficients, game_time
+            )
+        )
+        self.velocity = self.velocity.normalize() * updated_speed
+
         if hasattr(self, 'is_fragment'):
             self.position = self.manual_position.copy()
         else:
@@ -195,6 +207,7 @@ class Asteroid(CircleShape):
             print(f"SPLIT_SPEEDUP = {asteroids.SPLIT_SPEEDUP}")
             print(f"old velocity = {a.velocity}")
             a.velocity *= asteroids.SPLIT_SPEEDUP
+            a.initial_speed = a.velocity.length()
             print(f"sped up velocity = {a.velocity}")
             a.velocity = a.velocity.rotate(angle * direction)
             print(f"rotated velocity = {a.velocity}")
@@ -204,6 +217,7 @@ class Asteroid(CircleShape):
             print(f"Fragment {direction}: pos={a.position}, vel={a.velocity}, radius={new_radius}")
             a.is_fragment = True  # Mark as fragment for tracking
             a.creation_time = pygame.time.get_ticks()
+            a.fragmentation_counter = self.fragmentation_counter + 1
             print(f"AFTER SETUP: pos={a.position}")
 
         print(f"=== SPLIT COMPLETED ===")
