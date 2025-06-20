@@ -54,14 +54,13 @@ class AsteroidField(pygame.sprite.Sprite):
         asteroid = Asteroid(position, radius)
         asteroid.velocity = velocity
 
-    # TODO: Handle despawning when leaving the screen here!
-
     def update(self, dt: float) -> None:
         """Potentially spawn new asteroids and keep increasing spawn rate if configured.
 
         Args:
             dt (float): Elapsed time in seconds
         """
+        # print(f"ASTEROID UPDATE CALLED: {id(self)}")
         game_time = pygame.time.get_ticks() / 1000  # in seconds
         # No division by zero, and only decrease if SPAWN_RATE_INCREASE > 0
         adjustment = (game_time / SPAWN_RATE_INCREASE) if SPAWN_RATE_INCREASE > 0 else 0
@@ -79,4 +78,3 @@ class AsteroidField(pygame.sprite.Sprite):
             position = edge[1](random.uniform(0, 1))
             scale = random.randint(1, SIZES)
             self.spawn(MIN_RADIUS * scale, position, velocity)
-
