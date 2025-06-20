@@ -61,7 +61,6 @@ class AsteroidField(pygame.sprite.Sprite):
         Args:
             dt (float): Elapsed time in seconds
         """
-        # print(f"ASTEROID UPDATE CALLED: {id(self)}")
         game_time = pygame.time.get_ticks() / 1000  # in seconds
         spawn_rate_per_sec = SPAWN_RATE_GROWTH.function_type.calculate_multiplier(
             SPAWN_RATE_GROWTH.coefficients, game_time

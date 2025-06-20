@@ -61,7 +61,7 @@ class EdgeInfo(NamedTuple):
 class BoundaryEdge(Enum):
     """Enumeration of screen edges with their corresponding EdgeInfo."""
     LEFT = EdgeInfo(LEFT)
-    RIGHT = EdgeInfo(RIGHT) 
+    RIGHT = EdgeInfo(RIGHT)
     TOP = EdgeInfo(TOP)
     BOTTOM = EdgeInfo(BOTTOM)
 
