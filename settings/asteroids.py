@@ -87,7 +87,7 @@ MAX_RADIUS = MIN_RADIUS * SIZES
 # Spawning
 SPAWN_RATE_GROWTH = GrowthSetting(
     function_type=GrowthFunction.POLYNOMIAL,
-    coefficients=(0.1, 0.8)
+    coefficients=(0.1, 2.0)
 )  # spawns per second
 STARTING_SPEED_SPREAD = (40, 100)  # pixels per second
 SPEED_GROWTH = GrowthSetting(
@@ -99,7 +99,7 @@ SPAWN_INVUL_TIME_IN_SEC = 1.0
 
 # Splitting
 SPLIT_SPEEDUP = 1
-SPLIT_DIRECTIONS = (-0.5, 0, 0.5) # (-1, -0.5, 0, 0.5, 1,)
+SPLIT_DIRECTIONS = (-1, 1) # (-0.5, 0, 0.5) # (-1, -0.5, 0, 0.5, 1,)
 SPLIT_ANGLE = (10, 45)
 
 # Collision
@@ -110,6 +110,6 @@ ON_COLLISION = CollisionBehaviour.NOTHING
 BORDER_WIDTH_NORMAL = 2
 BORDER_WIDTH_INVULNERABLE_MULTIPLIER = 4
 BORDER_COLOR = 'white'
-FILL_COLOR = 'lightgray'
+FILL_COLOR = 'black'
 INVULNERABILITY_BLINKING_PER_SECOND = 2.0
 INVULNERABILITY_BLINK_PATTERN = (1, 0)  # ratio between on (first) and off (second)
