@@ -22,7 +22,7 @@ class CircleShape(pygame.sprite.Sprite):
         super().__init__(*self.containers)
 
         self._position: pygame.Vector2 = start_position
-        self.velocity: pygame.Vector2 = pygame.Vector2(0, 0)  # velocity in pixels per second
+        self._velocity: pygame.Vector2 = pygame.Vector2(0, 0)  # velocity in pixels per second
         self.radius: float = radius
 
         self.rect = pygame.Rect(
@@ -36,12 +36,21 @@ class CircleShape(pygame.sprite.Sprite):
         self.image: Optional[pygame.Surface] = None
 
     @property
+    def velocity(self) -> pygame.Vector2:
+        return self._velocity
+
+    @velocity.setter
+    def velocity(self, value: pygame.Vector2) -> None:
+        # make a copy to prevent side effects
+        self._velocity = value.copy()
+
+    @property
     def position(self) -> pygame.Vector2:
         return self._position
 
     @position.setter
     def position(self, value: pygame.Vector2) -> None:
-        self._position = value
+        self._position = value.copy()
         # Automatically update rect when position changes
         self.rect.center = (int(value.x), int(value.y))
 
