@@ -38,7 +38,7 @@ class CircleShape(pygame.sprite.Sprite):
     @property
     def position(self) -> pygame.Vector2:
         return self._position
-    
+
     @position.setter
     def position(self, value: pygame.Vector2) -> None:
         self._position = value
