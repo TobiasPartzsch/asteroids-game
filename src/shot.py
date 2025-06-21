@@ -1,5 +1,6 @@
 import pygame
 
+import settings.graphics as graphics
 from src.circleshape import CircleShape
 from settings.shot import RADIUS
 
@@ -20,12 +21,21 @@ class Shot(CircleShape):
         Args:
             screen (pygame.Surface): Surface representing our screen to draw upon.
         """
+        # Draw filled circle first
         pygame.draw.circle(
             screen,
-            color="white",
+            color=graphics.GameColors.SHOT_FILL,
             center=self.position,
             radius=self.radius,
-            width=2,
+        )
+
+        # Draw border on top
+        pygame.draw.circle(
+            screen,
+            color=graphics.GameColors.SHOT_BORDER,
+            center=self.position,
+            radius=self.radius,
+            width=graphics.BorderWidths.SHOT,
         )
 
     def update(self, dt: float) -> None:

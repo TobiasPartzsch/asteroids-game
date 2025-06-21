@@ -1,5 +1,6 @@
 import pygame
 
+import settings.graphics as graphics_settings
 import settings.player as player_settings
 import settings.shot as shot_settings
 from src.circleshape import CircleShape
@@ -49,9 +50,15 @@ class Player(CircleShape):
         """
         pygame.draw.polygon(
             surface=screen,
-            color="white",
+            color=graphics_settings.GameColors.PLAYER_FILL,
             points=self.triangle(),
-            width=2,
+        )
+
+        pygame.draw.polygon(
+            surface=screen,
+            color=graphics_settings.GameColors.PLAYER_BORDER,
+            points=self.triangle(),
+            width=graphics_settings.BorderWidths.PLAYER,
         )
 
     def rotate(self, dt: float) -> None:
