@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum, auto
 import math
+
 from src.collision_types import CollisionBehaviour
 
 PolynomialCoefficients = tuple[float, ...]
@@ -107,9 +108,6 @@ COLLISION_ENABLED = False
 ON_COLLISION = CollisionBehaviour.NOTHING
 
 # Visual
-BORDER_WIDTH_NORMAL = 2
 BORDER_WIDTH_INVULNERABLE_MULTIPLIER = 4
-BORDER_COLOR = 'white'
-FILL_COLOR = 'black'
 INVULNERABILITY_BLINKING_PER_SECOND = 2.0
 INVULNERABILITY_BLINK_PATTERN = (1, 0)  # ratio between on (first) and off (second)
