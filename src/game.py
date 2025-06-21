@@ -1,7 +1,7 @@
 from src.asteroid_sprite import Asteroid
 from src.asteroidfield import AsteroidField
 from src.player import Player
-from settings.display import FPS, SCREEN_HEIGHT, SCREEN_WIDTH, TIMER_FONT, TIMER_FONT_SIZE, GameColors
+from settings.graphics import FPS, SCREEN_HEIGHT, SCREEN_WIDTH, TIMER_FONT, TIMER_FONT_SIZE, GameColors
 from src.shot import Shot
 
 

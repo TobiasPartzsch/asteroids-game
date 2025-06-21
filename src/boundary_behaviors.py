@@ -13,7 +13,7 @@ from src.edge_functions import (
     left_trajectory_transfer, right_trajectory_transfer, top_trajectory_transfer, bottom_trajectory_transfer,  # type: ignore
     horizontal_bounce, vertical_bounce,  # type: ignore
 )
-from settings.display import SCREEN_HEIGHT, SCREEN_WIDTH
+from settings.graphics import SCREEN_HEIGHT, SCREEN_WIDTH
 import settings.player as player_settings
 
 

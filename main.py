@@ -1,7 +1,7 @@
 
 
 from src.game import Game
-from settings.display import FPS, SCREEN_HEIGHT, SCREEN_WIDTH
+from settings.graphics import FPS, SCREEN_HEIGHT, SCREEN_WIDTH
 
 
 def main():

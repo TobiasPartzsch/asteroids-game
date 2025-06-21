@@ -6,7 +6,7 @@ import random
 
 from src.asteroid_sprite import Asteroid
 from settings.asteroids import MAX_RADIUS, MIN_RADIUS, SIZES, SPAWN_RATE_GROWTH, STARTING_SPEED_SPREAD
-from settings.display import SCREEN_HEIGHT, SCREEN_WIDTH
+from settings.graphics import SCREEN_HEIGHT, SCREEN_WIDTH
 
 
 class AsteroidField(pygame.sprite.Sprite):

@@ -4,7 +4,7 @@ from typing import Any, Callable, Optional
 import pygame
 
 import settings.asteroids as asteroids
-import settings.display as display
+import settings.graphics as graphics
 from src.physics import bounce_asteroids
 from src.circleshape import CircleShape
 from src.collision_types import CollisionBehaviour
@@ -96,8 +96,8 @@ class Asteroid(CircleShape):
         screen_rect = pygame.Rect(
             -buffer,
             -buffer,
-            display.SCREEN_WIDTH + 2*buffer,
-            display.SCREEN_HEIGHT + 2*buffer,
+            graphics.SCREEN_WIDTH + 2*buffer,
+            graphics.SCREEN_HEIGHT + 2*buffer,
         )
         if not self.rect.colliderect(screen_rect):
             self.kill()

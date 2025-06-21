@@ -4,7 +4,7 @@ import pygame
 
 if TYPE_CHECKING:
     from src.player import Player  # Only import for type checking
-from settings.display import SCREEN_HEIGHT, SCREEN_WIDTH
+from settings.graphics import SCREEN_HEIGHT, SCREEN_WIDTH
 
 
 # Condition functions
