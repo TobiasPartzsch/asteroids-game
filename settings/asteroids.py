@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum, auto
 import math
-from collision_types import CollisionBehaviour
+from src.collision_types import CollisionBehaviour
 
 PolynomialCoefficients = tuple[float, ...]
 ExponentialCoefficients = tuple[float, float]

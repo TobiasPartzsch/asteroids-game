@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 import pygame
 
 if TYPE_CHECKING:
-    from player import Player  # Only import for type checking
+    from src.player import Player  # Only import for type checking
 from settings.display import SCREEN_HEIGHT, SCREEN_WIDTH
 
 

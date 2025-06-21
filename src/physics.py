@@ -2,7 +2,7 @@
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from asteroid_sprite import Asteroid
+    from src.asteroid_sprite import Asteroid
 
 import pygame
 

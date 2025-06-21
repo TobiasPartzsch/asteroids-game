@@ -1,8 +1,8 @@
-from asteroid_sprite import Asteroid
-from asteroidfield import AsteroidField
-from player import Player
+from src.asteroid_sprite import Asteroid
+from src.asteroidfield import AsteroidField
+from src.player import Player
 from settings.display import FPS, SCREEN_HEIGHT, SCREEN_WIDTH, TIMER_FONT, TIMER_FONT_SIZE, GameColors
-from shot import Shot
+from src.shot import Shot
 
 
 import pygame

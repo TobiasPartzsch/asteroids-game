@@ -1,6 +1,6 @@
 import pygame
 
-from circleshape import CircleShape
+from src.circleshape import CircleShape
 from settings.shot import RADIUS
 
 

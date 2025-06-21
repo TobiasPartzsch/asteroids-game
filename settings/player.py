@@ -1,4 +1,4 @@
-from boundary_behaviors import BoundaryBehavior
+from src.boundary_behaviors import BoundaryBehavior
 
 
 RADIUS = 20.0

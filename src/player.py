@@ -2,8 +2,8 @@ import pygame
 
 import settings.player as player_settings
 import settings.shot as shot_settings
-from circleshape import CircleShape
-from shot import Shot
+from src.circleshape import CircleShape
+from src.shot import Shot
 
 
 class Player(CircleShape):

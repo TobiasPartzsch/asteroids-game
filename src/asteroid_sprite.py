@@ -5,9 +5,9 @@ import pygame
 
 import settings.asteroids as asteroids
 import settings.display as display
-from physics import bounce_asteroids
-from circleshape import CircleShape
-from collision_types import CollisionBehaviour
+from src.physics import bounce_asteroids
+from src.circleshape import CircleShape
+from src.collision_types import CollisionBehaviour
 
 
 class Asteroid(CircleShape):

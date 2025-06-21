@@ -4,9 +4,9 @@ from enum import Enum, auto
 import pygame
 
 if TYPE_CHECKING:
-    from player import Player  # Only import for type checking
+    from src.player import Player  # Only import for type checking
 
-from edge_functions import (
+from src.edge_functions import (
     left_condition, right_condition, top_condition, bottom_condition,  # type: ignore
     left_edge_transfer, right_edge_transfer, top_edge_transfer, bottom_edge_transfer,  # type: ignore
     left_momentum_transfer, right_momentum_transfer, top_momentum_transfer, bottom_momentum_transfer,  # type: ignore

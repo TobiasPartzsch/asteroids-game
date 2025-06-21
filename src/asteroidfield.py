@@ -4,7 +4,7 @@ from typing import Any, Callable, ClassVar
 import pygame
 import random
 
-from asteroid_sprite import Asteroid
+from src.asteroid_sprite import Asteroid
 from settings.asteroids import MAX_RADIUS, MIN_RADIUS, SIZES, SPAWN_RATE_GROWTH, STARTING_SPEED_SPREAD
 from settings.display import SCREEN_HEIGHT, SCREEN_WIDTH
 
