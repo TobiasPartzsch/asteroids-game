@@ -9,10 +9,6 @@ from player import Player
 from settings.display import FPS, SCREEN_HEIGHT, SCREEN_WIDTH, TIMER_FONT, TIMER_FONT_SIZE, GameColors
 from shot import Shot
 
-# --- Debug Variable ---
-DEBUG_CURRENT_GAME_TIME = 0.0 # <--- Add this module-level variable
-# --- End Debug Variable ---
-
 
 class Game:
     """Main game class for Asteroids."""
