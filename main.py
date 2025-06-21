@@ -1,6 +1,6 @@
 
 
-from src.Game import Game
+from src.game import Game
 from settings.display import FPS, SCREEN_HEIGHT, SCREEN_WIDTH
 
 
