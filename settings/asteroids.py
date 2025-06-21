@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum, auto
 import math
 
-from src.collision_types import CollisionBehaviour
+from src.collision_types import CollisionBehavior
 
 PolynomialCoefficients = tuple[float, ...]
 ExponentialCoefficients = tuple[float, float]
@@ -82,32 +82,32 @@ class GrowthSetting:
 
 # Shape
 MIN_RADIUS = 20.0
-SIZES = 5
-MAX_RADIUS = MIN_RADIUS * SIZES
+SIZES = 5  # Number of size tiers, size works as a multiplier on MIN_RADIUS
+MAX_RADIUS = MIN_RADIUS * SIZES  # Maximum radius for the largest asteroid tier
 
 # Spawning
 SPAWN_RATE_GROWTH = GrowthSetting(
     function_type=GrowthFunction.POLYNOMIAL,
     coefficients=(0.1, 2.0)
 )  # spawns per second
-STARTING_SPEED_SPREAD = (40, 100)  # pixels per second
+STARTING_SPEED_SPREAD = (40, 100)  # Range (min, max) of initial speeds for newly spawned asteroids (pixels/sec)
 SPEED_GROWTH = GrowthSetting(
     function_type=GrowthFunction.EXPONETIAL,
     coefficients=(1.0, 0.03,)
-)  # multiplier on speed
+)  # multiplier on speed of new fragments on split
 SPAWN_INVUL_TIME_IN_SEC = 1.0
-
 
 # Splitting
 SPLIT_SPEEDUP = 1
-SPLIT_DIRECTIONS = (-1, 1) # (-0.5, 0, 0.5) # (-1, -0.5, 0, 0.5, 1,)
+SPLIT_DIRECTIONS = (-1, 1)  # multipliers on the random split rotation angle
+# other examples (-0.5, 0, 0.5) # (-1, -0.5, 0, 0.5, 1,)
 SPLIT_ANGLE = (10, 45)
 
 # Collision
-COLLISION_ENABLED = False
-ON_COLLISION = CollisionBehaviour.NOTHING
+COLLISION_ENABLED = False  # Master switch for asteroid-asteroid collisions, not fully implemented
+ON_COLLISION = CollisionBehavior.NOTHING  # Behavior when two asteroids collide
 
 # Visual
 BORDER_WIDTH_INVULNERABLE_MULTIPLIER = 4
 INVULNERABILITY_BLINKING_PER_SECOND = 2.0
-INVULNERABILITY_BLINK_PATTERN = (1, 0)  # ratio between on (first) and off (second)
+INVULNERABILITY_BLINK_PATTERN = (1, 0)  # Tuple (on_cycles, off_cycles) for invulnerability blinking

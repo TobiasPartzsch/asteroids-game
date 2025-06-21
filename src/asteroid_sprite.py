@@ -7,7 +7,7 @@ import settings.asteroids as asteroids
 import settings.graphics as graphics
 from src.physics import bounce_asteroids
 from src.circleshape import CircleShape
-from src.collision_types import CollisionBehaviour
+from src.collision_types import CollisionBehavior
 
 
 class Asteroid(CircleShape):
@@ -27,8 +27,8 @@ class Asteroid(CircleShape):
         self.invulnerable_timer = asteroids.SPAWN_INVUL_TIME_IN_SEC
         self.fragmentation_counter = 0
         self.initial_speed: Optional[float] = None
-        self.border_color: str = graphics.GameColors.FOREGROUND
-        self.fill_color: str = graphics.GameColors.BACKGROUND
+        self.border_color: str | tuple[int, int, int] = graphics.GameColors.FOREGROUND
+        self.fill_color: str | tuple[int, int, int] = graphics.GameColors.BACKGROUND
 
     def draw(self, screen: pygame.Surface) -> None:
         """Draw asteroids as a simple circle with a white border."""
@@ -145,14 +145,14 @@ class Asteroid(CircleShape):
     def handle_collision(
             self,
             other_asteroid: "Asteroid",
-            behaviour: CollisionBehaviour=CollisionBehaviour.DELETE):
+            behaviour: CollisionBehavior=CollisionBehavior.DELETE):
         # Dictionary mapping behaviours to methods
         # TODO: move to constants.py eventually. Maybe
-        behaviours: dict[CollisionBehaviour, Callable[[], None]] = {
-            CollisionBehaviour.NOTHING: lambda: None,
-            CollisionBehaviour.DELETE: lambda: do(self.kill, other_asteroid.kill),
-            CollisionBehaviour.SPLIT: lambda: do(self.split, other_asteroid.split),
-            CollisionBehaviour.BOUNCE: lambda: self.bounce_with(other_asteroid)
+        behaviours: dict[CollisionBehavior, Callable[[], None]] = {
+            CollisionBehavior.NOTHING: lambda: None,
+            CollisionBehavior.DELETE: lambda: do(self.kill, other_asteroid.kill),
+            CollisionBehavior.SPLIT: lambda: do(self.split, other_asteroid.split),
+            CollisionBehavior.BOUNCE: lambda: self.bounce_with(other_asteroid)
         }
         # Execute the selected behaviour
         behaviours[behaviour]()

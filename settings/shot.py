@@ -1,2 +1,2 @@
-SPEED = 500
-RADIUS = 5.0
+SPEED: float = 500
+RADIUS: float = 5.0

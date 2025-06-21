@@ -134,4 +134,4 @@ class Player(CircleShape):
         shot.velocity = forward * shot_settings.SPEED
 
         # put the gun on cooldown
-        self.shot_timer = player_settings.SHOOT_COOLDOWN
+        self.shot_timer = player_settings.SHOOT_COOLDOWN_SECOND

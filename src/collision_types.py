@@ -2,7 +2,7 @@
 from enum import Enum, auto
 
 
-class CollisionBehaviour(Enum):
+class CollisionBehavior(Enum):
     NOTHING = auto()
     DELETE = auto()
     SPLIT = auto()
