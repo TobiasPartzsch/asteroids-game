@@ -27,6 +27,8 @@ class Asteroid(CircleShape):
         self.invulnerable_timer = asteroids.SPAWN_INVUL_TIME_IN_SEC
         self.fragmentation_counter = 0
         self.initial_speed: Optional[float] = None
+        self.border_color: str = graphics.GameColors.FOREGROUND
+        self.fill_color: str = graphics.GameColors.BACKGROUND
 
     def draw(self, screen: pygame.Surface) -> None:
         """Draw asteroids as a simple circle with a white border."""
@@ -39,14 +41,14 @@ class Asteroid(CircleShape):
                 return  # Don't draw this frame
 
         # Calculate border width based on invulnerability
-        border_width = asteroids.BORDER_WIDTH_NORMAL * (
+        border_width = graphics.BorderWidths.ASTEROID * (
             1 + asteroids.BORDER_WIDTH_INVULNERABLE_MULTIPLIER * (self.invulnerable_timer > 0)
         )
 
         # Draw filled circle first
         pygame.draw.circle(
             screen,
-            color=asteroids.FILL_COLOR,
+            color=self.fill_color,
             center=self.position,
             radius=self.radius,
         )
@@ -54,7 +56,7 @@ class Asteroid(CircleShape):
         # Draw border on top
         pygame.draw.circle(
             screen,
-            color=asteroids.BORDER_COLOR,
+            color=self.border_color,
             center=self.position,
             radius=self.radius,
             width=border_width,
@@ -128,6 +130,8 @@ class Asteroid(CircleShape):
             a.initial_speed = a.velocity.length()
             a.velocity = a.velocity.rotate(angle * direction)
             a.fragmentation_counter = self.fragmentation_counter + 1
+            a.border_color = self.border_color
+            a.fill_color = self.fill_color
 
     def bounce_with(self, other: "Asteroid") -> None:
         """Bounce with another asteroid. Both velocities will be changed.

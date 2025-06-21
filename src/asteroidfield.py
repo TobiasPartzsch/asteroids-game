@@ -5,8 +5,16 @@ import pygame
 import random
 
 from src.asteroid_sprite import Asteroid
-from settings.asteroids import MAX_RADIUS, MIN_RADIUS, SIZES, SPAWN_RATE_GROWTH, STARTING_SPEED_SPREAD
-from settings.graphics import SCREEN_HEIGHT, SCREEN_WIDTH
+from settings.asteroids import (
+    MAX_RADIUS, MIN_RADIUS,
+    SIZES,
+    SPAWN_RATE_GROWTH,
+    STARTING_SPEED_SPREAD
+)
+from settings.graphics import (
+    ASTEROID_BORDER_COLOR_OPTIONS, ASTEROID_FILL_COLOR_OPTIONS,
+    SCREEN_HEIGHT, SCREEN_WIDTH
+)
 
 
 class AsteroidField(pygame.sprite.Sprite):
@@ -54,6 +62,8 @@ class AsteroidField(pygame.sprite.Sprite):
         asteroid = Asteroid(position, radius)
         asteroid.velocity = velocity
         asteroid.initial_speed = velocity.length()
+        asteroid.border_color = random.choice(ASTEROID_BORDER_COLOR_OPTIONS)
+        asteroid.fill_color = random.choice(ASTEROID_FILL_COLOR_OPTIONS)
 
     def update(self, dt: float) -> None:
         """Potentially spawn new asteroids and keep increasing spawn rate if configured.
