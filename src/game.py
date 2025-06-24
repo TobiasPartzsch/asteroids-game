@@ -110,7 +110,7 @@ class Game:
                 # Check if asteroids are still alive before handling collision
                 if not (a1.alive() and a2.alive()):
                      continue
-                a1.handle_collision(a2, asteroids.ON_COLLISION)
+                asteroids.ON_COLLISION.handler(a1, a2)
 
     def update(self, dt: float) -> None:
         """
