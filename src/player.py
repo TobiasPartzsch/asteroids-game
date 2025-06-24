@@ -82,7 +82,7 @@ class Player(CircleShape):
             dt (float): Time elapsed since last frame. Can be negative for reverse movement.
         """
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
-        player_settings.BOUNDARY_BEHAVIOR.get_handler()(self, forward, dt)
+        player_settings.BOUNDARY_BEHAVIOR.handler(self, forward, dt)
 
     def update(self, dt: float) -> None:
         """Update the player state based on keyboard input and elapsed time.

@@ -93,9 +93,10 @@ class BoundaryBehavior(Enum):
                               # If moving diagonally through top-left, emerge from bottom-right with same angle
     WRAP_RELATIVE = auto()  # Map position as percentage of screen, teleport to same relative position on opposite side
 
-    def get_handler(self) -> Callable[["Player", pygame.Vector2, float], None]:
+    # Add a property to dynamically get the handler function based on the enum value (lowercase name)
+    @property
+    def handler(self) -> Callable[["Player", pygame.Vector2, float], None]:
         return globals()[f"handle_{self.value}"]
-
 
 def handle_pass_through(player: "Player", forward: pygame.Vector2, dt: float) -> None:
     """Allow movement off-screen without any boundary checks."""
