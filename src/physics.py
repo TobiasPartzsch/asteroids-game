@@ -4,8 +4,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from src.asteroid_sprite import Asteroid
 
-import pygame
-
 
 def bounce_asteroids(asteroid1: "Asteroid", asteroid2: "Asteroid") -> None:
     """Change the trajectory (velocity vector) of two asteroids so that they bounce away from each other.

@@ -1,5 +1,5 @@
 import random
-from typing import Any, Callable, Optional
+from typing import Optional
 
 import pygame
 
