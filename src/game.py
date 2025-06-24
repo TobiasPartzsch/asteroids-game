@@ -1,15 +1,13 @@
-from src.asteroid_sprite import Asteroid
-from src.asteroidfield import AsteroidField
-from src.player import Player
-from settings.graphics import FPS, SCREEN_HEIGHT, SCREEN_WIDTH, TIMER_FONT, TIMER_FONT_SIZE, GameColors
-from src.shot import Shot
-
+import sys
+from typing import Any, Set
 
 import pygame
 
-
-import sys
-from typing import Any, Set
+from settings import asteroids, graphics
+from src.asteroid_sprite import Asteroid
+from src.asteroidfield import AsteroidField
+from src.player import Player
+from src.shot import Shot
 
 
 class Game:
@@ -18,9 +16,9 @@ class Game:
     def __init__(self) -> None:
         (numpass, numfail) = pygame.init()
         print(f"Initalized with {numpass} passes and {numfail} fails")
-        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        self.screen = pygame.display.set_mode((graphics.SCREEN_WIDTH, graphics.SCREEN_HEIGHT))
         pygame.display.set_caption("Asteroids")
-        self.timer_font = pygame.font.Font(TIMER_FONT, TIMER_FONT_SIZE)
+        self.timer_font = pygame.font.Font(graphics.TIMER_FONT, graphics.TIMER_FONT_SIZE)
         self.clock = pygame.time.Clock()
         self.running = True
         self.load_assets()
@@ -41,8 +39,8 @@ class Game:
 
         self.player = Player(
             start_position=pygame.Vector2(
-                SCREEN_WIDTH / 2,
-                SCREEN_HEIGHT / 2,
+                graphics.SCREEN_WIDTH / 2,
+                graphics.SCREEN_HEIGHT / 2,
             )
         )
         self.asteroid_field = AsteroidField()
@@ -92,21 +90,27 @@ class Game:
                 minutes, seconds = Game.game_time_min_sec()
                 sys.exit(f"Game over! You lasted {minutes:02}:{seconds:02}")
 
-        # # optional asteroid collision with each other
-        # asteroid_list = self.asteroids.sprites()
-        # if ASTEROID_COLLISION_ENABLED:
-        #     colliding_asteroids: Set[Asteroid] = set()
-        #     for (idx1, a1) in enumerate(self.asteroids, 0):
-        #         # look forward
-        #         for a2 in asteroid_list[idx1 + 1::], idx1 + 1:
-        #             if a1.check_collision(a2):
-        #                 colliding_asteroids.add((a1, a2))
-        #     for (a1, a2) in colliding_asteroids:
-        #             a1.handle_collision(a2, ASTEROID_ON_COLLISION)
-        #     else:
-        #         asteroids_to_process = set(chain(*colliding_asteroids))
-        #         for _ in asteroids_to_process:
-        #             _.kill()
+        # optional asteroid collision with each other
+        if asteroids.COLLISION_ENABLED:
+            asteroid_list: list[Asteroid] = self.vulnerable_asteroids.sprites().copy()
+            num_asteroids = len(asteroid_list)
+            colliding_asteroids: Set[tuple[Asteroid, Asteroid]] = set()
+            for (idx1, a1) in enumerate(asteroid_list, 0):
+                if not a1.alive():
+                    continue
+                # for a2 in asteroid_list[idx1 + 1:]:
+                for idx2 in range(idx1 + 1, num_asteroids):  # index iteration for improved performance
+                    a2 = asteroid_list[idx2]
+                    if not a2.alive():
+                        continue
+                    if a1.check_collision(a2):
+                        colliding_asteroids.add((a1, a2))
+
+            for (a1, a2) in colliding_asteroids:
+                # Check if asteroids are still alive before handling collision
+                if not (a1.alive() and a2.alive()):
+                     continue
+                a1.handle_collision(a2, asteroids.ON_COLLISION)
 
     def update(self, dt: float) -> None:
         """
@@ -123,7 +127,7 @@ class Game:
 
     def draw(self) -> None:
         """Draw everything to the screen."""
-        self.screen.fill(GameColors.BACKGROUND)
+        self.screen.fill(graphics.GameColors.BACKGROUND)
         for _ in self.drawable:
             _.draw(self.screen)
 
@@ -137,7 +141,7 @@ class Game:
         """Main loop: process events, update state, draw, repeat."""
 
         while self.running:
-            dt = self.clock.tick(FPS) / 1000.0  # seconds since last frame
+            dt = self.clock.tick(graphics.FPS) / 1000.0  # seconds since last frame
             self.handle_events()
             self.handle_collisions()
             self.update(dt)
