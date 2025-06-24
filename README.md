@@ -2,16 +2,32 @@
 
 This is an implementation of the classic arcade game Asteroids.
 
-**Gameplay:**
+## Gameplay
 
 You pilot a spaceship, represented by a triangle, in a field of dangerous asteroids. Your objective is to survive as long as possible by moving your ship and shooting to destroy the incoming asteroids.
 
-**Controls:**
+## Controls
 
 *   Use **WASD** keys to move and turn your spaceship.
 *   Press **SPACE** to fire your weapon.
 
-Should an asteroid collide with your spaceship, it's an instant game over! Currently, there is no scoring system or explicit win condition, but the game will display your survival time at the end of each attempt.
+## Key Concepts & Mechanics
+
+*   **Asteroid Splitting:** When hit by a shot, larger asteroids get reduced in size and may split into smaller fragments.
+*   **Invulnerability:** Newly spawned or split asteroids are temporarily invulnerable, indicated by blinking and/or a thicker border.
+*   **Game Over:** Collision with an asteroid results in instant game over.
+*  **Collision Detection:** For collision between circular shapes (the player's ship, asteroids and shots) a precise circular collision detection method is used. For simpler checks, such as determining if a sprite is outside the screen boundaries, Pygame's built-in rectangular collision checks (`sprite.rect.colliderect()`) are used. This is less precise for rotation but efficient for basic boundary checks.
+*  **Scoring:** Currently, there is no scoring system or explicit win condition, but the game will display your survival time at the end of each attempt.
+
+## Collision Detection
+
+Collision detection is handled in two main ways in this game:
+
+1.  **Circular Collision:** For checking overlaps between game objects that are circular in shape (the player's ship, asteroids, and shots), a precise circular collision detection method is used. This checks if the distance between the centers of two circular objects is less than the sum of their radii. This logic is primarily implemented within the `CircleShape.check_collision()` method and utilized in the `Game.handle_collisions()` loop.
+
+2.  **Rectangular Collision:** For simpler checks, such as determining if a sprite is outside the screen boundaries, Pygame's built-in rectangular collision checks (`sprite.rect.colliderect()`) are used. This is less precise for rotation but efficient for basic boundary checks.
+
+All collision responses (like splitting asteroids or triggering game over) are handled in the `Game.handle_collisions()` method based on the results of these checks.
 
 ## Built With
 
