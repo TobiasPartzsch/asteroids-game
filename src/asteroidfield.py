@@ -46,8 +46,8 @@ class AsteroidField(pygame.sprite.Sprite):
 
     def __init__(
             self,
-            vulnerable_asteroids_group: pygame.sprite.Group[Asteroid],
-            invulnerable_asteroids_group: pygame.sprite.Group[Asteroid],
+            vulnerable_asteroids_group: pygame.sprite.Group[Any],
+            invulnerable_asteroids_group: pygame.sprite.Group[Any],
         ):
         """Initialize a new asteroid field. The containers are derived from the class variable."""
         super().__init__(*self.containers)
