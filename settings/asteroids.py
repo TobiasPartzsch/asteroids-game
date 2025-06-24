@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum, auto
 import math
 
-from src.collision_types import CollisionBehavior
+from src.collision_behaviors import CollisionBehavior
 
 PolynomialCoefficients = tuple[float, ...]
 ExponentialCoefficients = tuple[float, float]
@@ -96,6 +96,7 @@ SPEED_GROWTH = GrowthSetting(
     coefficients=(1.0, 0.03,)
 )  # multiplier on speed of new fragments on split
 SPAWN_INVUL_TIME_IN_SEC = 1.0
+MAX_SPAWN_ATTEMPTS = 30  # trade-off between performance (low values) and having a chance to spawn in a crowded field (high values)
 
 # Splitting
 SPLIT_SPEEDUP = 1
@@ -104,8 +105,8 @@ SPLIT_DIRECTIONS = (-1, 1)  # multipliers on the random split rotation angle
 SPLIT_ANGLE = (10, 45)
 
 # Collision
-COLLISION_ENABLED = False  # Master switch for asteroid-asteroid collisions, not fully implemented
-ON_COLLISION = CollisionBehavior.NOTHING  # Behavior when two asteroids collide
+COLLISION_ENABLED = True  # Master switch for asteroid-asteroid collisions, not fully implemented
+ON_COLLISION = CollisionBehavior.DELETE  # Behavior when two asteroids collide
 
 # Visual
 BORDER_WIDTH_INVULNERABLE_MULTIPLIER = 4
