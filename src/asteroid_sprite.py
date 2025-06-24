@@ -7,7 +7,6 @@ import settings.asteroids as asteroids
 import settings.graphics as graphics
 from src.physics import bounce_asteroids
 from src.circleshape import CircleShape
-from src.collision_types import CollisionBehavior
 
 
 class Asteroid(CircleShape):
@@ -142,22 +141,3 @@ class Asteroid(CircleShape):
         """
         bounce_asteroids(self, other)
 
-    def handle_collision(
-            self,
-            other_asteroid: "Asteroid",
-            behaviour: CollisionBehavior=CollisionBehavior.DELETE):
-        # Dictionary mapping behaviours to methods
-        # TODO: move to constants.py eventually. Maybe
-        behaviours: dict[CollisionBehavior, Callable[[], None]] = {
-            CollisionBehavior.NOTHING: lambda: None,
-            CollisionBehavior.DELETE: lambda: do(self.kill, other_asteroid.kill),
-            CollisionBehavior.SPLIT: lambda: do(self.split, other_asteroid.split),
-            CollisionBehavior.BOUNCE: lambda: self.bounce_with(other_asteroid)
-        }
-        # Execute the selected behaviour
-        behaviours[behaviour]()
-
-
-def do(*funcs: Callable[[], Any]) -> None:
-    for f in funcs:
-        f()
