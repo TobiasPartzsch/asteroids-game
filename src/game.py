@@ -43,7 +43,7 @@ class Game:
                 graphics.SCREEN_HEIGHT / 2,
             )
         )
-        self.asteroid_field = AsteroidField()
+        self.asteroid_field = AsteroidField(self.vulnerable_asteroids, self.invulnerable_asteroids)
 
 
     def load_assets(self) -> None:
