@@ -6,6 +6,12 @@ This is an implementation of the classic arcade game Asteroids.
 
 You pilot a spaceship, represented by a triangle, in a field of dangerous asteroids. Your objective is to survive as long as possible by moving your ship and shooting to destroy the incoming asteroids.
 
+## Features
+- Arcade-style physics with asteroid collisions based on size
+- Configurable difficulty scaling over time  
+- Multiple boundary behaviors (wrap, bounce, etc.)
+- Invulnerability periods with visual feedback
+
 ## Controls
 
 *   Use **WASD** keys to move and turn your spaceship.
@@ -69,7 +75,7 @@ To get a copy of the game up and running on your local machine, follow these ste
         ```cmd
         .venv\Scripts\activate.bat
         ```
-    *   **On Windows (PowerShell):
+    *   **On Windows (PowerShell):**
         ```powershell
         .venv\Scripts\Activate.ps1
         ```
@@ -118,27 +124,43 @@ This section details the primary settings available for adjusting the game's dif
     *   `BorderWidths` (`IntEnum`): Adjust the integer values for the border thickness of different game objects.
 
 *   **`settings/asteroids.py`**:
-    *   **Asteroid Growth Settings (`GrowthSetting` dataclasses):**
-        *   The game uses `GrowthSetting` dataclasses to define how certain parameters change over time. Each `GrowthSetting` specifies a `function_type` (`GrowthFunction.POLYNOMIAL` or `GrowthFunction.EXPONETIAL`) and a tuple of `coefficients` that determine the rate of growth.
-        *   You can choose between a **polynomial** function (`ax^n + bx^(n-1) + ...`) or an **exponential** function (`ae^(bx)`) to model growth.
-        *   Adjust the `coefficients` according to the chosen function type to change the growth curve. (Refer to the `GrowthFunction` docstrings in the code for detailed coefficient format).
-        *   `SPAWN_RATE_GROWTH`: Controls how frequently new asteroids are added to the game over time. Modifying its coefficients impacts the rate of new asteroid appearance.
-        *   `SPEED_GROWTH`: This `GrowthSetting` defines a multiplier applied to asteroid speeds over time. Adjusting its coefficients will make all asteroids (including fragments) get faster at a different rate as the game progresses.
 
-    *   `STARTING_SPEED_SPREAD` (`tuple[float, float]`): A `(min, max)` tuple defining the range of initial speeds in pixels per second for newly spawned asteroids.
-    *   `MIN_RADIUS` (`float`) and `SIZES` (`int`): `MIN_RADIUS` sets the base size of the smallest asteroid tier. `SIZES` determines the total number of asteroid size tiers (e.g., 5 sizes means radii of `MIN_RADIUS * 1`, `MIN_RADIUS * 2`, ..., `MIN_RADIUS * 5`).
+    **Shape Settings:**
+    *   `MIN_RADIUS` (`float`): The base size of the smallest asteroid tier.
+    *   `SIZES` (`int`): The total number of asteroid size tiers (e.g., 5 sizes means radii of `MIN_RADIUS * 1`, `MIN_RADIUS * 2`, ..., `MIN_RADIUS * 5`).
     *   `MAX_RADIUS` (`float`): The calculated maximum radius for the largest asteroid tier (`MIN_RADIUS * SIZES`).
+
+    **Spawning Settings:**
+    *   **Growth Functions**: The game uses `GrowthSetting` dataclasses to define how certain parameters change over time, making the game progressively more challenging. Each `GrowthSetting` specifies:
+        *   `function_type`: Either `GrowthFunction.POLYNOMIAL` or `GrowthFunction.EXPONENTIAL`
+        *   `coefficients`: A tuple of numbers that define the growth curve
+        
+        **Polynomial functions** (`ax^n + bx^(n-1) + ... + k`) use coefficients in decreasing power order:
+        *   `(0.1, 2.0)` represents `0.1*time + 2.0` (linear growth)
+        *   `(0.05, 0.1, 1.0)` represents `0.05*time² + 0.1*time + 1.0` (quadratic growth)
+        
+        **Exponential functions** (`ae^(bx)`) use exactly two coefficients `(a, b)`:
+        *   `(1.0, 0.03)` represents `1.0 * e^(0.03*time)` (exponential growth)
+    
+    *   `SPAWN_RATE_GROWTH` (`GrowthSetting`): Controls how frequently new asteroids are added to the game over time. Uses a `GrowthSetting` dataclass with configurable growth functions.
+    *   `STARTING_SPEED_SPREAD` (`tuple[float, float]`): A `(min, max)` tuple defining the range of initial speeds in pixels per second for newly spawned asteroids.
+    *   `SPEED_GROWTH` (`GrowthSetting`): Defines a multiplier applied to asteroid speeds over time, making asteroids progressively faster as the game continues.
     *   `SPAWN_INVUL_TIME_IN_SEC` (`float`): The duration in seconds that a new or split asteroid is invulnerable (indicated by blinking).
-    *   **Splitting Settings:**
-        *   When an asteroid is hit by a shot, it splits into smaller fragments if it is still larger than `MIN_RADIUS`. The number of fragments is determined by the length of `SPLIT_DIRECTIONS`.
-        *   The size of the resulting fragments is the parent asteroid's radius minus `MIN_RADIUS`. An asteroid with a radius equal to `MIN_RADIUS` will not split further.
-        *   `SPLIT_DIRECTIONS` (`tuple[float, ...]`) : This tuple contains multipliers applied to the `SPLIT_ANGLE` to determine the direction of each fragment relative to the parent asteroid's velocity. For example, `(-1, 1)` creates two fragments rotated by `-SPLIT_ANGLE` and `+SPLIT_ANGLE`, while `(-0.5, 0, 0.5)` creates three fragments with rotations `-0.5 * SPLIT_ANGLE`, `0 * SPLIT_ANGLE` (straight), and `0.5 * SPLIT_ANGLE`. Adjust these multipliers to change the spread of fragments.
-        *   `SPLIT_ANGLE` (`tuple[float, float]`): A `(min, max)` tuple defining the range in degrees from which a random angle is chosen for splitting. This angle is then multiplied by the values in `SPLIT_DIRECTIONS`.
-        *   `SPLIT_SPEEDUP` (`float`): A multiplier applied to the parent asteroid's velocity to determine the base speed of the newly created fragments. A value of `1.0` means fragments start with the same speed as the parent at the moment of split (before the game time speed growth is applied to the fragments).
+    *   `MAX_SPAWN_ATTEMPTS` (`int`): Maximum attempts to find a clear spawn location before giving up.
 
-    *   `COLLISION_ENABLED` (`bool`): Set to `True` to enable experimental asteroid-asteroid collisions (note: this feature may not be fully implemented or stable).
-    *   `ON_COLLISION` (`CollisionBehavior`): Defines the behavior when two asteroids collide (e.g., `NOTHING`, `DELETE`, `SPLIT`, `BOUNCE`).
+    **Splitting Settings:**
+    *   `SPLIT_SPEEDUP` (`float`): A multiplier applied to the parent asteroid's velocity for newly created fragments.
+    *   `SPLIT_DIRECTIONS` (`tuple[float, ...]`): Multipliers applied to `SPLIT_ANGLE` to determine fragment directions. For example, `(-1, 1)` creates two fragments, while `(-0.5, 0, 0.5)` creates three.
+    *   `SPLIT_ANGLE` (`tuple[float, float]`): A `(min, max)` range in degrees for the random split angle.
 
+    **Collision Settings:**
+    *   `COLLISION_ENABLED` (`bool`): Set to `True` to enable asteroid-asteroid collisions with physics-based bouncing.
+    *   `ON_COLLISION` (`CollisionBehavior`): Defines the behavior when two asteroids collide (options: `NOTHING`, `DELETE`, `SPLIT`, `BOUNCE`).
+
+    **Visual Settings:**
+    *   `BORDER_WIDTH_INVULNERABLE_MULTIPLIER` (`int`): Multiplier for border thickness during invulnerability periods.
+    *   `INVULNERABILITY_BLINKING_PER_SECOND` (`float`): How many times per second invulnerable asteroids blink.
+    *   `INVULNERABILITY_BLINK_PATTERN` (`tuple[int, int]`): Pattern for blinking as `(on_cycles, off_cycles)`.
 *   **`src/player.py`**:
     *   `RADIUS` (`float`): The size of the player's spaceship.
     *   `TURN_SPEED` (`float`): How fast the player's spaceship rotates (e.g., in degrees per second).
