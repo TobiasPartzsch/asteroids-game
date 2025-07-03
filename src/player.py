@@ -1,11 +1,17 @@
+from typing import Protocol
+
 import pygame
 
+import settings.controls as controls_settings
 import settings.graphics as graphics_settings
 import settings.player as player_settings
 import settings.shot as shot_settings
 from src.circleshape import CircleShape
 from src.shot import Shot
 
+
+class KeysPressed(Protocol):
+    def __getitem__(self, key: int) -> bool: ...
 
 class Player(CircleShape):
     """Represents the player's ship in the game.
@@ -72,42 +78,35 @@ class Player(CircleShape):
         """
         self.rotation += player_settings.TURN_SPEED * dt
 
-    def move(self, dt: float) -> None:
-        """Move the player forward in their current facing direction.
-        
-        Movement speed and boundary behavior are determined by player settings.
-        Negative dt values move the player backward.
+    def thrust(self, dt: float) -> None:
+        """Move the player forward or backward in their current facing direction."""
+        direction = pygame.Vector2(0, 1).rotate(self.rotation)
+        speed = player_settings.FORWARD_SPEED if dt > 0 else player_settings.BACKWARD_SPEED
+        distance = dt * speed
+        player_settings.BOUNDARY_BEHAVIOR.handler(self, direction, distance)
 
-        Args:
-            dt (float): Time elapsed since last frame. Can be negative for reverse movement.
-        """
+    def strafe(self, dt: float) -> None:
+        """Move the player sideways perpendicular to their ship orientation."""
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
-        player_settings.BOUNDARY_BEHAVIOR.handler(self, forward, dt)
+        direction = pygame.Vector2(-forward.y, forward.x)  # Right vector
+        if dt < 0:
+            direction = -direction  # Flip for left movement
+        distance = dt * player_settings.STRAFE_SPEED
+        player_settings.BOUNDARY_BEHAVIOR.handler(self, direction, distance)
+
+    def move_screen_relative(self, direction: pygame.Vector2, dt: float) -> None:
+        """Move the player in screen-relative direction (for mouse controls)."""
+        distance = player_settings.FORWARD_SPEED * dt  # Uniform speed for all directions
+        player_settings.BOUNDARY_BEHAVIOR.handler(self, direction, distance )
 
     def update(self, dt: float) -> None:
-        """Update the player state based on keyboard input and elapsed time.
-        
-        Handles:
-        - A/D keys for rotation (left/right)
-        - W/S keys for movement (forward/backward) 
-        - Space key for shooting
-        - Shot cooldown timer countdown
-
-        Args:
-            dt (float): Time elapsed since the last frame in seconds.
-        """
+        """Update player state based on active control scheme and input depending on passed time."""
         keys = pygame.key.get_pressed()
+        mouse_pos = pygame.mouse.get_pos()
 
-        if keys[pygame.K_a]:
-            self.rotate(dt * -1)
-        if keys[pygame.K_d]:
-            self.rotate(dt)
-        if keys[pygame.K_w]:
-            self.move(dt)
-        if keys[pygame.K_s]:
-            self.move(dt * -1)
-        if keys[pygame.K_SPACE]:
-            self.shoot()
+        controls_settings.ACTIVE_CONTROL_SCHEME.handle_input(
+            self, keys, mouse_pos, dt  # type: ignore[arg-type]
+        )
 
         self.shot_timer -= dt
 
