@@ -1,9 +1,12 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
+
 import pygame
 
 if TYPE_CHECKING:
     from src.player import Player  # Only import for type checking
+
 from settings.graphics import SCREEN_HEIGHT, SCREEN_WIDTH
 
 
@@ -69,10 +72,10 @@ def bottom_momentum_transfer(player: Player) -> None:
 # Trajectory transfer functions
 def left_trajectory_transfer(player: Player) -> None:
     """Transfer player from left edge maintaining diagonal trajectory."""
-    from settings.player import SPEED
+    from settings.player import FORWARD_SPEED
 
     # Calculate current velocity vector from rotation
-    velocity = pygame.Vector2(0, 1).rotate(player.rotation) * SPEED
+    velocity = pygame.Vector2(0, 1).rotate(player.rotation) * FORWARD_SPEED
 
     # How far past the left boundary did we go?
     overshoot_x = player.radius - player.position.x
@@ -90,10 +93,10 @@ def left_trajectory_transfer(player: Player) -> None:
 
 def right_trajectory_transfer(player: Player) -> None:
     """Transfer player from right edge maintaining diagonal trajectory."""
-    from settings.player import SPEED
+    from settings.player import FORWARD_SPEED
 
     # Calculate current velocity vector from rotation
-    velocity = pygame.Vector2(0, 1).rotate(player.rotation) * SPEED
+    velocity = pygame.Vector2(0, 1).rotate(player.rotation) * FORWARD_SPEED
 
     # How far past the right boundary did we go?
     overshoot_x = player.position.x - (SCREEN_WIDTH - player.radius)
@@ -111,10 +114,10 @@ def right_trajectory_transfer(player: Player) -> None:
 
 def top_trajectory_transfer(player: Player) -> None:
     """Transfer player from top edge maintaining diagonal trajectory."""
-    from settings.player import SPEED
+    from settings.player import FORWARD_SPEED
 
     # Calculate current velocity vector from rotation
-    velocity = pygame.Vector2(0, 1).rotate(player.rotation) * SPEED
+    velocity = pygame.Vector2(0, 1).rotate(player.rotation) * FORWARD_SPEED
     
     # How far past the top boundary did we go?
     overshoot_y = player.radius - player.position.y
@@ -131,10 +134,10 @@ def top_trajectory_transfer(player: Player) -> None:
 
 def bottom_trajectory_transfer(player: Player) -> None:
     """Transfer player from bottom edge maintaining diagonal trajectory."""
-    from settings.player import SPEED
+    from settings.player import FORWARD_SPEED
 
     # Calculate current velocity vector from rotation
-    velocity = pygame.Vector2(0, 1).rotate(player.rotation) * SPEED
+    velocity = pygame.Vector2(0, 1).rotate(player.rotation) * FORWARD_SPEED
     
     # How far past the bottom boundary did we go?
     overshoot_y = player.position.y - (SCREEN_HEIGHT - player.radius)
