@@ -1,21 +1,15 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any, Callable, NamedTuple
+
 from enum import Enum, auto
+from typing import TYPE_CHECKING, Any, Callable, NamedTuple
+
 import pygame
 
 if TYPE_CHECKING:
     from src.player import Player  # Only import for type checking
 
-from src.edge_functions import (
-    left_condition, right_condition, top_condition, bottom_condition,  # type: ignore
-    left_edge_transfer, right_edge_transfer, top_edge_transfer, bottom_edge_transfer,  # type: ignore
-    left_momentum_transfer, right_momentum_transfer, top_momentum_transfer, bottom_momentum_transfer,  # type: ignore
-    left_trajectory_transfer, right_trajectory_transfer, top_trajectory_transfer, bottom_trajectory_transfer,  # type: ignore
-    horizontal_bounce, vertical_bounce,  # type: ignore
-)
 from settings.graphics import SCREEN_HEIGHT, SCREEN_WIDTH
-import settings.player as player_settings
-
+from src.edge_functions import *
 
 # Bounce function constants
 HORIZONTAL_BOUNCE = "horizontal_bounce"
@@ -98,22 +92,22 @@ class BoundaryBehavior(Enum):
     def handler(self) -> Callable[["Player", pygame.Vector2, float], None]:
         return globals()[f"handle_{self.value}"]
 
-def handle_pass_through(player: "Player", forward: pygame.Vector2, dt: float) -> None:
+def handle_pass_through(player: "Player", forward: pygame.Vector2, distance: float) -> None:
     """Allow movement off-screen without any boundary checks."""
-    player.position += forward * player_settings.SPEED * dt
+    player.position += forward * distance
 
 
-def handle_clamp(player: "Player", forward: pygame.Vector2, dt: float) -> None:
+def handle_clamp(player: "Player", forward: pygame.Vector2, distance: float) -> None:
     """Move first, then constrain position to screen boundaries (smooth sliding)."""
-    new_position = player.position + forward * player_settings.SPEED * dt
+    new_position = player.position + forward * distance
     new_position.x = max(player.radius, min(SCREEN_WIDTH - player.radius, new_position.x))
     new_position.y = max(player.radius, min(SCREEN_HEIGHT - player.radius, new_position.y))
     player.position = new_position
 
 
-def handle_stick(player: "Player", forward: pygame.Vector2, dt: float) -> None:
+def handle_stick(player: "Player", forward: pygame.Vector2, distance: float) -> None:
     """Move per-axis with boundary checks (more tactile feel)."""
-    movement = forward * player_settings.SPEED * dt
+    movement = forward * distance
 
     # Clamp current position first if already outside bounds
     current_x = max(player.radius, min(SCREEN_WIDTH - player.radius, player.position.x))
@@ -137,9 +131,9 @@ def handle_stick(player: "Player", forward: pygame.Vector2, dt: float) -> None:
     player.position = pygame.Vector2(final_x, final_y)
 
 
-def handle_bounce(player: "Player", forward: pygame.Vector2, dt: float) -> None:
+def handle_bounce(player: "Player", forward: pygame.Vector2, distance: float) -> None:
     """Reflect player movement off screen boundaries."""
-    movement = forward * player_settings.SPEED * dt
+    movement = forward * distance
     new_position = player.position + movement
 
     # Collect all edges that would be hit
@@ -160,7 +154,7 @@ def handle_bounce(player: "Player", forward: pygame.Vector2, dt: float) -> None:
         
         # NOW recalculate movement with the new rotation
         new_forward = pygame.Vector2(0, 1).rotate(player.rotation)
-        new_movement = new_forward * player_settings.SPEED * dt
+        new_movement = new_forward * distance
         new_position_after_bounce = player.position + new_movement
         
         # Clamp to boundaries
@@ -170,9 +164,9 @@ def handle_bounce(player: "Player", forward: pygame.Vector2, dt: float) -> None:
         player.position = pygame.Vector2(final_x, final_y)
 
 
-def handle_check(player: "Player", forward: pygame.Vector2, dt: float) -> None:
+def handle_check(player: "Player", forward: pygame.Vector2, distance: float) -> None:
     """Validate movement before applying (all-or-nothing)."""
-    new_position = player.position + forward * player_settings.SPEED * dt
+    new_position = player.position + forward * distance
     
     # Only move if the entire new position is within bounds
     if (player.radius <= new_position.x <= SCREEN_WIDTH - player.radius and
@@ -184,11 +178,11 @@ def handle_check(player: "Player", forward: pygame.Vector2, dt: float) -> None:
 def _handle_boundary_transfer(
     player: "Player", 
     forward: pygame.Vector2, 
-    dt: float,
+    distance: float,
     behavior: BoundaryBehavior
 ) -> None:
     """Generic boundary handler that uses different transfer methods for wrapping."""
-    new_position = player.position + forward * player_settings.SPEED * dt
+    new_position = player.position + forward * distance
 
     # Extract transfer type from enum: WRAP_EDGE -> edge
     transfer_type = behavior.name.removeprefix("WRAP_").lower()  # "edge", "momentum", etc.
@@ -203,21 +197,21 @@ def _handle_boundary_transfer(
         player.position = new_position
 
 
-def handle_wrap_edge(player: "Player", forward: pygame.Vector2, dt: float) -> None:
+def handle_wrap_edge(player: "Player", forward: pygame.Vector2, distance: float) -> None:
     """Wrap player using simple edge-to-edge transfer."""
-    _handle_boundary_transfer(player, forward, dt, BoundaryBehavior.WRAP_EDGE)
+    _handle_boundary_transfer(player, forward, distance, BoundaryBehavior.WRAP_EDGE)
 
 
-def handle_wrap_momentum(player: "Player", forward: pygame.Vector2, dt: float) -> None:
+def handle_wrap_momentum(player: "Player", forward: pygame.Vector2, distance: float) -> None:
     """Wrap player preserving velocity-based overshoot."""
-    _handle_boundary_transfer(player, forward, dt, BoundaryBehavior.WRAP_MOMENTUM)
+    _handle_boundary_transfer(player, forward, distance, BoundaryBehavior.WRAP_MOMENTUM)
 
 
-def handle_wrap_trajectory(player: "Player", forward: pygame.Vector2, dt: float) -> None:
+def handle_wrap_trajectory(player: "Player", forward: pygame.Vector2, distance: float) -> None:
     """Wrap player maintaining exact trajectory across the wrap."""
-    _handle_boundary_transfer(player, forward, dt, BoundaryBehavior.WRAP_TRAJECTORY)
+    _handle_boundary_transfer(player, forward, distance, BoundaryBehavior.WRAP_TRAJECTORY)
 
 
-def handle_wrap_relative(player: "Player", forward: pygame.Vector2, dt: float) -> None:
+def handle_wrap_relative(player: "Player", forward: pygame.Vector2, distance: float) -> None:
     """Wrap player mapping position as percentage to opposite side."""
-    _handle_boundary_transfer(player, forward, dt, BoundaryBehavior.WRAP_RELATIVE)
+    _handle_boundary_transfer(player, forward, distance, BoundaryBehavior.WRAP_RELATIVE)
