@@ -8,14 +8,38 @@ You pilot a spaceship, represented by a triangle, in a field of dangerous astero
 
 ## Features
 - Arcade-style physics with asteroid collisions based on size
+- Three different control schemes (tank, mouse ship-relative, mouse screen-relative)
 - Configurable difficulty scaling over time  
 - Multiple boundary behaviors (wrap, bounce, etc.)
 - Invulnerability periods with visual feedback
 
 ## Controls
 
-*   Use **WASD** keys to move and turn your spaceship.
-*   Press **SPACE** to fire your weapon.
+The game supports three different control schemes to suit different player preferences:
+
+### Tank Controls (Default)
+*   **WASD** keys for ship-relative movement and rotation
+*   **W/S** - Move forward/backward along ship's facing direction
+*   **A/D** - Rotate ship left/right
+*   **SPACE** - Fire weapon
+
+### Mouse Ship-Relative Controls  
+*   **Mouse** - Aim ship direction
+*   **WASD** - Move relative to ship orientation
+*   **W/S** - Move forward/backward along ship's facing direction
+*   **A/D** - Strafe left/right relative to ship
+*   **SPACE** - Fire weapon
+
+### Mouse Screen-Relative Controls
+*   **Mouse** - Aim ship direction  
+*   **WASD** - Move relative to screen
+*   **W** - Move up on screen
+*   **S** - Move down on screen
+*   **A** - Move left on screen
+*   **D** - Move right on screen
+*   **SPACE** - Fire weapon
+
+*Control scheme can be changed in `settings/controls.py` by modifying `ACTIVE_CONTROL_SCHEME`.*
 
 ## Key Concepts & Mechanics
 
@@ -161,6 +185,13 @@ This section details the primary settings available for adjusting the game's dif
     *   `BORDER_WIDTH_INVULNERABLE_MULTIPLIER` (`int`): Multiplier for border thickness during invulnerability periods.
     *   `INVULNERABILITY_BLINKING_PER_SECOND` (`float`): How many times per second invulnerable asteroids blink.
     *   `INVULNERABILITY_BLINK_PATTERN` (`tuple[int, int]`): Pattern for blinking as `(on_cycles, off_cycles)`.
+
+*   **`settings/controls.py`**:
+    *   `ACTIVE_CONTROL_SCHEME`: Choose between `TANK_CONTROLS`, `MOUSE_SHIP_CONTROLS`, or `MOUSE_SCREEN_CONTROLS`
+    *   **Control Scheme Configuration**: Each scheme defines movement type, turn behavior, and key mappings
+    *   **Movement Types**: `TANK` (classic), `MOUSE_SHIP_RELATIVE` (mouse aiming + ship movement), `MOUSE_SCREEN_RELATIVE` (mouse aiming + screen movement)
+    *   **Turn Behaviors**: `SMOOTH` (gradual rotation), `MOUSE_FOLLOW` (instant/smooth mouse following), `DISCRETE` (snap to angles)
+
 *   **`src/player.py`**:
     *   `RADIUS` (`float`): The size of the player's spaceship.
     *   `TURN_SPEED` (`float`): How fast the player's spaceship rotates (e.g., in degrees per second).
