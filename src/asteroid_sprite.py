@@ -5,8 +5,8 @@ import pygame
 
 import settings.asteroids as asteroids
 import settings.graphics as graphics
-from src.physics import bounce_asteroids
 from src.circleshape import CircleShape
+from src.physics import bounce_asteroids
 
 
 class Asteroid(CircleShape):
@@ -41,7 +41,7 @@ class Asteroid(CircleShape):
 
         # Calculate border width based on invulnerability
         border_width = graphics.BorderWidths.ASTEROID * (
-            1 + asteroids.BORDER_WIDTH_INVULNERABLE_MULTIPLIER * (self.invulnerable_timer > 0)
+            asteroids.BORDER_WIDTH_INVULNERABLE_MULTIPLIER if (self.invulnerable_timer > 0) else 1
         )
 
         # Draw filled circle first
