@@ -1,16 +1,31 @@
 import unittest
+from unittest.mock import Mock, patch
+import pygame
 from src.edge_functions import *
+from tests.testing.helpers import test_settings
 
-class TestEdge_functionsUnit(unittest.TestCase):
+class TestEdgeFunctionsUnit(unittest.TestCase):
     """Unit tests for edge_functions module with mocked dependencies."""
+    
+    def setUp(self):
+        pygame.init()  # Needed for Vector2 operations
+    
     pass
 
-class TestEdge_functionsIntegration(unittest.TestCase):
+class TestEdgeFunctionsIntegration(unittest.TestCase):
     """Integration tests for edge_functions module with real pygame objects."""
+    
+    def setUp(self):
+        pygame.init()
+    
     pass
 
-class TestEdge_functionsPhysics(unittest.TestCase):
+class TestEdgeFunctionsPhysics(unittest.TestCase):
     """Physics/math tests for edge_functions module."""
+    
+    def setUp(self):
+        pygame.init()
+    
     pass
 
 if __name__ == '__main__':
