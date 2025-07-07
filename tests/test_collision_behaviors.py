@@ -1,8 +1,11 @@
 import unittest
 from unittest.mock import Mock, patch
+
 import pygame
+
 from src.collision_behaviors import *
-from tests.testing.helpers import test_settings
+from tests.testing.helpers import override_settings
+
 
 class TestCollisionBehaviorsUnit(unittest.TestCase):
     """Unit tests for collision_behaviors module with mocked dependencies."""

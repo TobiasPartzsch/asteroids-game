@@ -1,8 +1,11 @@
 import unittest
 from unittest.mock import Mock, patch
+
 import pygame
+
 from src.player import *
-from tests.testing.helpers import test_settings
+from tests.testing.helpers import override_settings
+
 
 class TestPlayerUnit(unittest.TestCase):
     """Unit tests for player module with mocked dependencies."""

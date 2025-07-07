@@ -1,8 +1,11 @@
 import unittest
 from unittest.mock import Mock, patch
+
 import pygame
+
 from src.physics import *
-from tests.testing.helpers import test_settings
+from tests.testing.helpers import override_settings
+
 
 class TestPhysicsUnit(unittest.TestCase):
     """Unit tests for physics module with mocked dependencies."""

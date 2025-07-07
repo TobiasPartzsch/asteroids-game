@@ -1,8 +1,11 @@
 import unittest
 from unittest.mock import Mock, patch
+
 import pygame
+
 from src.asteroidfield import *
-from tests.testing.helpers import test_settings
+from tests.testing.helpers import override_settings
+
 
 class TestAsteroidfieldUnit(unittest.TestCase):
     """Unit tests for asteroidfield module with mocked dependencies."""
