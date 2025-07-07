@@ -53,6 +53,16 @@ class InitializationScenario:
     expected_attributes: dict[str, Any]
     should_raise: Optional[type[Exception]] = None
 
+@dataclass(frozen=True)
+class UpdateAsteroidScenario:
+    """Scenario for testing asteroid update behavior."""
+    name: str
+    initial_position: pygame.Vector2
+    initial_velocity: pygame.Vector2
+    initial_timer: float
+    dt: float
+    expected_position: pygame.Vector2
+    expected_timer: float
 
 def run_initialization_scenarios(
     test_instance: TestCase,
@@ -81,4 +91,15 @@ def run_method_scenarios(
     for case_name, scenario in test_cases.items():
         with test_instance.subTest(case=case_name):
             result = method(scenario.input)
+            test_instance.assertEqual(result, scenario.expected)
+
+def run_update_asteroid_scenarios(
+    test_instance: TestCase,
+    method: Callable[..., T],
+    test_cases: Mapping[str, UpdateAsteroidScenario]
+) -> None:
+    """Generic helper for testing method calls with scenarios."""
+    for case_name, scenario in test_cases.items():
+        with test_instance.subTest(case=case_name):
+            result = 
             test_instance.assertEqual(result, scenario.expected)
