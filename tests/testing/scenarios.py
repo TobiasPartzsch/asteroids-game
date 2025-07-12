@@ -1,9 +1,14 @@
 # tests/testing/scenarios.py
-from dataclasses import dataclass
+from contextlib import nullcontext
+from dataclasses import dataclass, field
 from typing import Any, Callable, Generic, Mapping, Optional, TypeVar
 from unittest import TestCase
+from unittest.mock import patch
 
 import pygame
+
+from settings import asteroids
+from src.asteroid_sprite import Asteroid
 
 T = TypeVar('T')
 
@@ -57,21 +62,37 @@ class InitializationScenario:
 class UpdateAsteroidScenario:
     """Scenario for testing asteroid update behavior."""
     name: str
+    initial_position: pygame.Vector2 = field(default_factory=lambda: pygame.Vector2(100, 100))
+    initial_timer: float = 0.0
+    initial_velocity: pygame.Vector2 = field(default_factory=lambda: pygame.Vector2(0, 0))
+    initial_speed: float = 0.0
+    dt: float = 0.0
+    game_time: float = 0.0  # In seconds, for precise control in tests
+    settings: Optional[dict[str, Any]] = None
+    expected_position: Optional[pygame.Vector2] = None
+    expected_timer: Optional[float] = None
+    expected_velocity: Optional[pygame.Vector2] = None
+    expected_speed: Optional[float] = None
+
+@dataclass(frozen=True)
+class SplitAsteroidScenario:
+    name: str
+    initial_radius: float
     initial_position: pygame.Vector2
     initial_velocity: pygame.Vector2
-    initial_timer: float
-    dt: float
-    expected_position: pygame.Vector2
-    expected_timer: float
+    split_directions: tuple[int, ...]
+    min_radius: float
+    expect_num_fragments: int
+
 
 def run_initialization_scenarios(
     test_instance: TestCase,
     constructor: Callable[..., Any],
-    test_cases: Mapping[str, InitializationScenario]
+    test_cases: tuple[InitializationScenario, ...]
 ) -> None:
     """Generic helper to run initialization test scenarios."""
-    for case_name, scenario in test_cases.items():
-        with test_instance.subTest(case=case_name):
+    for scenario in test_cases:
+        with test_instance.subTest(case=scenario.name):
             if scenario.should_raise:
                 with test_instance.assertRaises(scenario.should_raise):
                     constructor(*scenario.init_args.values(), **scenario.init_kwargs)
@@ -85,21 +106,83 @@ def run_initialization_scenarios(
 def run_method_scenarios(
     test_instance: TestCase,
     method: Callable[..., T],
-    test_cases: Mapping[str, TestScenario[T]]
+    test_cases: tuple[TestScenario[T], ...]
 ) -> None:
     """Generic helper for testing method calls with scenarios."""
-    for case_name, scenario in test_cases.items():
-        with test_instance.subTest(case=case_name):
+    for scenario in test_cases:
+        with test_instance.subTest(case=scenario.name):
             result = method(scenario.input)
             test_instance.assertEqual(result, scenario.expected)
 
+
 def run_update_asteroid_scenarios(
     test_instance: TestCase,
-    method: Callable[..., T],
-    test_cases: Mapping[str, UpdateAsteroidScenario]
+    constructor: Callable[..., Any],  # Asteroid class
+    test_cases: tuple[UpdateAsteroidScenario, ...]
 ) -> None:
-    """Generic helper for testing method calls with scenarios."""
+    from tests.testing.helpers import override_settings
+    for scenario in test_cases:
+        with (
+            test_instance.subTest(case=scenario.name),
+            patch("pygame.time.get_ticks", return_value=int(scenario.game_time * 1000)),
+            ):
+            # Override any necessary settings for this scenario
+            context = (
+                override_settings(asteroids, **scenario.settings)
+                if scenario.settings
+                else nullcontext()
+            )
+            with context:
+                asteroid = constructor(scenario.initial_position, 30.0)
+                asteroid.velocity = scenario.initial_velocity
+                asteroid.invulnerable_timer = scenario.initial_timer
+                asteroid.initial_speed = scenario.initial_speed
+                asteroid.update(scenario.dt)
+                # Position assertion (optional)
+                if scenario.expected_position is not None:
+                    test_instance.assertEqual(
+                        asteroid.position.x, scenario.expected_position.x,
+                    )
+                    test_instance.assertEqual(
+                        asteroid.position.y, scenario.expected_position.y,
+                    )
+                # Timer assertion (optional)
+                if scenario.expected_timer is not None:
+                    test_instance.assertEqual(
+                        asteroid.invulnerable_timer, scenario.expected_timer,
+                    )
+                # Velocity assertion (optional)
+                if scenario.expected_velocity is not None:
+                    test_instance.assertEqual(
+                        asteroid.velocity.x, scenario.expected_velocity.x,
+                    )
+                    test_instance.assertEqual(
+                        asteroid.velocity.y, scenario.expected_velocity.y,
+                    )
+                # Speed assertion (optional)
+                if scenario.expected_speed is not None:
+                    test_instance.assertEqual(
+                        asteroid.velocity.length(), scenario.expected_speed,
+                    )
+
+def run_split_asteroid_scenarios(
+    test_instance: TestCase,
+    test_cases: Mapping[str, SplitAsteroidScenario]
+) -> None:
+    from tests.testing.helpers import override_settings
     for case_name, scenario in test_cases.items():
         with test_instance.subTest(case=case_name):
-            result = 
-            test_instance.assertEqual(result, scenario.expected)
+            with patch('src.asteroid_sprite.Asteroid') as mock_asteroid:
+                with override_settings(
+                    asteroids,
+                    SPLIT_DIRECTIONS=scenario.split_directions,
+                    MIN_RADIUS=scenario.min_radius,
+                ):
+                    asteroid = Asteroid(scenario.initial_position, scenario.initial_radius)
+                    asteroid.velocity = scenario.initial_velocity
+                    asteroid.split()
+                    test_instance.assertEqual(
+                        mock_asteroid.call_count, 
+                        scenario.expect_num_fragments,
+                        "Incorrect number of split asteroids created"
+                    )
