@@ -10,10 +10,11 @@ from src.asteroid_sprite import *
 from src.pygame_params import PYGAME_WIDTH_PARAM
 from tests.testing.helpers import (MockBorderWidths, MockGameColors,
                                    make_speed_growth_scenario,
-                                   override_settings)
+                                   make_split_scenario, override_settings)
 from tests.testing.scenarios import (InitializationScenario,
                                      UpdateAsteroidScenario,
                                      run_initialization_scenarios,
+                                     run_split_asteroid_scenarios,
                                      run_update_asteroid_scenarios)
 
 
@@ -335,18 +336,6 @@ class TestAsteroidSpriteUnit(unittest.TestCase):
 
     def test_split(self):
         """Test splitting an asteroid."""
-        # with (
-        #     override_settings(
-        #         asteroids,
-        #         MIN_RADIUS = 20.0,
-        #         SIZES = 4
-        #         SPLIT_SPEEDUP = 1.2,
-        #         SPLIT_DIRECTIONS = (-1, 0, 1),
-        #         SPLIT_ANGLE = (10, 45),
-        #     ),
-        # ):
-            # asteroid = Asteroid(pygame.Vector2(100, 100), 30.0)
-
         with self.subTest("split_calls_kill"):
             asteroid = Asteroid(pygame.Vector2(100, 100), 30.0)
             asteroid.kill = Mock()
@@ -354,18 +343,153 @@ class TestAsteroidSpriteUnit(unittest.TestCase):
             asteroid.kill.assert_called_once()
 
         with (
-            override_settings(
-                asteroids,
-                MIN_RADIUS = 20.0,
-            ),
+            override_settings(asteroids, MIN_RADIUS=20.0),
             self.subTest("don't split minimal size"),
             patch('src.asteroid_sprite.Asteroid') as mock_asteroid,
         ):
-            asteroid = Asteroid(pygame.Vector2(100, 100), asteroids.MIN_RADIUS)
+            asteroid = Asteroid(pygame.Vector2(50, 50), asteroids.MIN_RADIUS)
             asteroid.kill = Mock()
             asteroid.split()
+            asteroid.kill.assert_called_once()
             mock_asteroid.assert_not_called()
 
+        split_asteroid_scenarios = (
+            make_split_scenario(
+                name="single directly forward, no speed up",
+                min_radius=20.0,
+                initial_position=pygame.Vector2(0, 0),
+                initial_radius=60.0,
+                initial_velocity=pygame.Vector2(15, 5),
+                split_directions=(0, ),
+                split_angle=20.0,
+                split_speedup=1.0,
+            ),
+            make_split_scenario(
+                name="single directly forward, speedup 1.2",
+                min_radius=20.0,
+                initial_position=pygame.Vector2(100, 50),
+                initial_radius=60.0,
+                initial_velocity=pygame.Vector2(15, 5),
+                split_directions=(0, ),
+                split_angle=20.0,
+                split_speedup=1.0,
+            ),
+            make_split_scenario(
+                name="single directly forward, slowdown 0.4",
+                min_radius=20.0,
+                initial_position=pygame.Vector2(50, 100),
+                initial_radius=60.0,
+                initial_velocity=pygame.Vector2(15, 5),
+                split_directions=(0, ),
+                split_angle=20.0,
+                split_speedup=0.4,
+            ),
+            make_split_scenario(
+                name="multi split, 20 degree angle, no speedup",
+                min_radius=20.0,
+                initial_position=pygame.Vector2(0,0),
+                initial_radius=60.0,
+                initial_velocity=pygame.Vector2(-15, 5),
+                split_directions=(-1, 0, 1),
+                split_angle=20.0,
+                split_speedup=1.0,
+            ),
+            make_split_scenario(
+                name="multi split, 20 degree angle, speedup 1.2",
+                min_radius=20.0,
+                initial_position=pygame.Vector2(0,0),
+                initial_radius=60.0,
+                initial_velocity=pygame.Vector2(15, -5),
+                split_directions=(-1, 0, 1),
+                split_angle=20.0,
+                split_speedup=1.2,
+            ),
+            make_split_scenario(
+                name="multi split no forward, 10 degree angle, speedup 1.4",
+                min_radius=20.0,
+                initial_position=pygame.Vector2(0,0),
+                initial_radius=60.0,
+                initial_velocity=pygame.Vector2(-15, -5),
+                split_directions=(-1, -0.5, 1, 0.5),
+                split_angle=20.0,
+                split_speedup=1.2,
+            ),
+            make_split_scenario(
+                name="Edge case: fragment at minimum radius",
+                min_radius=20.0,
+                initial_position=pygame.Vector2(0,0),
+                initial_radius=20.1,
+                initial_velocity=pygame.Vector2(15, 5),
+                split_directions=(0, ),
+                split_angle=20.0,
+                split_speedup=1.0,
+            ),
+            make_split_scenario(
+                name="stopping after split",
+                min_radius=20.0,
+                initial_position=pygame.Vector2(0,0),
+                initial_radius=60.0,
+                initial_velocity=pygame.Vector2(15, 5),
+                split_directions=(-1, -0.5, 1, 0.5),
+                split_angle=20.0,
+                split_speedup=0.0,
+            ),
+            make_split_scenario(
+                name="large angle",
+                min_radius=20.0,
+                initial_position=pygame.Vector2(0,0),
+                initial_radius=60.0,
+                initial_velocity=pygame.Vector2(15, 5),
+                split_directions=(-1, -0.5, 1, 0.5),
+                split_angle=90.0,
+                split_speedup=1.2,
+            ),
+            make_split_scenario(
+                name="lots of directions",
+                min_radius=20.0,
+                initial_position=pygame.Vector2(0,0),
+                initial_radius=60.0,
+                initial_velocity=pygame.Vector2(15, 5),
+                split_directions=tuple(range(-4, 3)),
+                split_angle=5.0,
+                split_speedup=1.2,
+            ),
+            make_split_scenario(
+                name="small start velocity",
+                min_radius=20.0,
+                initial_position=pygame.Vector2(0,0),
+                initial_radius=60.0,
+                initial_velocity=pygame.Vector2(0.1, 0.02),
+                split_directions=(0, ),
+                split_angle=10.0,
+                split_speedup=1.2,
+            ),
+            make_split_scenario(
+                name="zero start velocity, speed up 1.2",
+                min_radius=20.0,
+                initial_position=pygame.Vector2(0,0),
+                initial_radius=60.0,
+                initial_velocity=pygame.Vector2(0, 0),
+                split_directions=(0, ),
+                split_angle=20.0,
+                split_speedup=1.2,
+            ),
+            make_split_scenario(
+                name="zero start velocity, no speed up",
+                min_radius=20.0,
+                initial_position=pygame.Vector2(0,0),
+                initial_radius=60.0,
+                initial_velocity=pygame.Vector2(0, 0),
+                split_directions=(0, ),
+                split_angle=20.0,
+                split_speedup=1.0,
+            ),
+        )
+        run_split_asteroid_scenarios(
+            self,
+            Asteroid,
+            split_asteroid_scenarios,
+        )
 
     def test_bounce_with(self):
         pass
