@@ -1,5 +1,5 @@
 import random
-from typing import Optional
+from typing import Optional, Protocol
 
 import pygame
 
@@ -7,6 +7,17 @@ import settings.asteroids as asteroids
 import settings.graphics as graphics
 from src.circleshape import CircleShape
 from src.physics import bounce_asteroids
+
+
+class AsteroidFactory(Protocol):
+    def __call__(
+        self,
+        position: pygame.Vector2,
+        radius: float,
+        *,
+        is_fragment: bool = False,
+        # **kwargs: dict[str, Any],
+    ) -> "Asteroid": ...
 
 
 class Asteroid(CircleShape):
@@ -106,11 +117,13 @@ class Asteroid(CircleShape):
     def kill(self):
         super().kill()
 
-    def split(self) -> None:
+    def split(self, asteroid_factory:Optional[AsteroidFactory]=None) -> None:
         """Split ourselves and create a number of new smaller asteroids moving in random (within limits) directions.
         The number of new asteroids and their directions (via a multiplier of our current velocity vector) is governed by constants.py.
         This asteroid gets killed.
         """
+        if asteroid_factory is None:
+            asteroid_factory = Asteroid  # Default to the real class
         self.kill()
 
         # don't split minimal asteroids
@@ -120,14 +133,13 @@ class Asteroid(CircleShape):
         angle = random.uniform(*asteroids.SPLIT_ANGLE)
         new_radius = self.radius - asteroids.MIN_RADIUS
 
+        original_velocity = self.velocity
         for direction in asteroids.SPLIT_DIRECTIONS:
-            a = Asteroid(self.position, new_radius, is_fragment=True)
+            a = asteroid_factory(self.position, new_radius, is_fragment=True)
 
-            # a.invulnerable_timer = asteroids.SPAWN_INVUL_TIME_IN_SEC  # Force fresh timer
-            a.velocity = self.velocity
-            a.velocity *= asteroids.SPLIT_SPEEDUP
+            a.invulnerable_timer = asteroids.SPAWN_INVUL_TIME_IN_SEC  # Force fresh timer
+            a.velocity = (original_velocity * asteroids.SPLIT_SPEEDUP).rotate(angle * direction)
             a.initial_speed = a.velocity.length()
-            a.velocity = a.velocity.rotate(angle * direction)
             a.fragmentation_counter = self.fragmentation_counter + 1
             a.border_color = self.border_color
             a.fill_color = self.fill_color
