@@ -492,7 +492,15 @@ class TestAsteroidSpriteUnit(unittest.TestCase):
         )
 
     def test_bounce_with(self):
-        pass
+        # Setup dummy asteroids
+        asteroid1 = Asteroid(pygame.Vector2(1, 1), 20.0)
+        asteroid2 = Asteroid(pygame.Vector2(2, 2), 25.0)
+
+        # Patch the physics function
+        with patch("src.asteroid_sprite.bounce_asteroids") as mock_bounce:
+            asteroid1.bounce_with(asteroid2)
+            # Assert bounce_asteroids was called once with these two asteroids
+            mock_bounce.assert_called_once_with(asteroid1, asteroid2)
 
 
 class TestAsteroidSpriteIntegration(unittest.TestCase):
