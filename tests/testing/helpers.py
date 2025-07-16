@@ -9,7 +9,8 @@ import pygame
 
 from settings import asteroids
 from src.asteroid_sprite import Asteroid
-from tests.testing.scenarios import UpdateAsteroidScenario
+from tests.testing.scenarios import (SplitAsteroidScenario,
+                                     UpdateAsteroidScenario)
 
 
 class MockGameColors(str, Enum):
@@ -125,4 +126,41 @@ def make_speed_growth_scenario(
         expected_velocity=expected_velocity,
         expected_speed=expected_speed,
         game_time=game_time,
+    )
+
+def make_split_scenario(
+    name: str,
+    min_radius: float,
+    initial_position: pygame.Vector2,
+    initial_radius: float,
+    initial_velocity: pygame.Vector2,
+    split_directions: tuple[float, ...],
+    split_angle: float,
+    split_speedup: float,
+) -> SplitAsteroidScenario:
+    new_radius = initial_radius - min_radius
+    base_vel = initial_velocity * split_speedup
+
+    expected_new_radii = tuple(new_radius for _ in split_directions)
+    expected_new_positions = tuple(initial_position for _ in split_directions)
+    expected_new_velocities = tuple(
+        base_vel.rotate(split_angle * direction) for direction in split_directions
+    )
+
+    # You can also build expected angles and speeds if needed:
+    # expected_new_angles = tuple(split_angle * direction for direction in split_directions)
+    # expected_new_speeds = tuple(base_vel.length() for _ in split_directions)
+
+    return SplitAsteroidScenario(
+        name=name,
+        min_radius=min_radius,
+        initial_position=initial_position,
+        initial_radius=initial_radius,
+        initial_velocity=initial_velocity,
+        split_directions=split_directions,
+        split_angle=split_angle,
+        split_speedup=split_speedup,
+        expected_new_radii=expected_new_radii,
+        expected_new_positions=expected_new_positions,
+        expected_new_velocities=expected_new_velocities,
     )
