@@ -152,4 +152,3 @@ class Asteroid(CircleShape):
             other (Asteroid): the other asteroid that we are bouncing with.
         """
         bounce_asteroids(self, other)
-
