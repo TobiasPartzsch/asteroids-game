@@ -6,12 +6,7 @@ from typing import Any, Callable, ClassVar
 
 import pygame
 
-from settings import asteroids
-from settings.asteroids import (MAX_RADIUS, MIN_RADIUS, SIZES,
-                                SPAWN_RATE_GROWTH, STARTING_SPEED_SPREAD)
-from settings.graphics import (ASTEROID_BORDER_COLOR_OPTIONS,
-                               ASTEROID_FILL_COLOR_OPTIONS, SCREEN_HEIGHT,
-                               SCREEN_WIDTH)
+from settings import asteroids, graphics
 from src.asteroid_sprite import Asteroid
 from src.circleshape import CircleShape
 
@@ -21,24 +16,32 @@ class AsteroidField(pygame.sprite.Sprite):
     They enter the screen from a random edge at a random position and a random angle.
     """
     edges: tuple[tuple[pygame.Vector2, Callable[[float], pygame.Vector2]], ...] = (
-        (
+        (  # Left edge - asteroids enter from left, moving right
             pygame.Vector2(1, 0),
-            lambda y: pygame.Vector2(-MAX_RADIUS, y * SCREEN_HEIGHT),
-        ),
-        (
-            pygame.Vector2(-1, 0),
             lambda y: pygame.Vector2(
-                SCREEN_WIDTH + MAX_RADIUS, y * SCREEN_HEIGHT
+                -asteroids.MAX_RADIUS,
+                y * graphics.SCREEN_HEIGHT
             ),
         ),
-        (
-            pygame.Vector2(0, 1),
-            lambda x: pygame.Vector2(x * SCREEN_WIDTH, -MAX_RADIUS),
+        (  # Right edge - asteroids enter from right, moving left
+            pygame.Vector2(-1, 0),
+            lambda y: pygame.Vector2(
+                graphics.SCREEN_WIDTH + asteroids.MAX_RADIUS,
+                y * graphics.SCREEN_HEIGHT,
+            ),
         ),
-        (
+        (  # Top edge - asteroids enter from top, moving down
+            pygame.Vector2(0, 1),
+            lambda x: pygame.Vector2(
+                x * graphics.SCREEN_WIDTH,
+                -asteroids.MAX_RADIUS
+            ),
+        ),
+        (  # Bottom edge - asteroids enter from bottom, moving up
             pygame.Vector2(0, -1),
             lambda x: pygame.Vector2(
-                x * SCREEN_WIDTH, SCREEN_HEIGHT + MAX_RADIUS
+                x * graphics.SCREEN_WIDTH,
+                graphics.SCREEN_HEIGHT + asteroids.MAX_RADIUS,
             ),
         ),
     )
@@ -67,8 +70,8 @@ class AsteroidField(pygame.sprite.Sprite):
         asteroid = Asteroid(position, radius)
         asteroid.velocity = velocity
         asteroid.initial_speed = velocity.length()
-        asteroid.border_color = random.choice(ASTEROID_BORDER_COLOR_OPTIONS)
-        asteroid.fill_color = random.choice(ASTEROID_FILL_COLOR_OPTIONS)
+        asteroid.border_color = random.choice(graphics.ASTEROID_BORDER_COLOR_OPTIONS)
+        asteroid.fill_color = random.choice(graphics.ASTEROID_FILL_COLOR_OPTIONS)
 
     def update(self, dt: float) -> None:
         """Potentially spawn new asteroids and keep increasing spawn rate if configured.
@@ -77,16 +80,16 @@ class AsteroidField(pygame.sprite.Sprite):
             dt (float): Elapsed time in seconds
         """
         game_time = pygame.time.get_ticks() / 1000  # in seconds
-        spawn_rate_per_sec = SPAWN_RATE_GROWTH.function_type.calculate_multiplier(
-            SPAWN_RATE_GROWTH.coefficients, game_time
+        spawn_rate_per_sec = asteroids.SPAWN_RATE_GROWTH.function_type.calculate_multiplier(
+            asteroids.SPAWN_RATE_GROWTH.coefficients, game_time
         )
         if spawn_rate_per_sec <= 0:
             raise ValueError(f"Calculated spawn rate of {spawn_rate_per_sec} isn't plausible.")
-        spawn_inveral_sec = 1 / spawn_rate_per_sec
+        spawn_interval_sec = 1 / spawn_rate_per_sec
 
         self.spawn_timer += dt
-        if self.spawn_timer > spawn_inveral_sec:
-            self.spawn_timer -= spawn_inveral_sec
+        if self.spawn_timer > spawn_interval_sec:
+            self.spawn_timer -= spawn_interval_sec
 
             attempts = 0
 
@@ -103,11 +106,11 @@ class AsteroidField(pygame.sprite.Sprite):
 
                 # create a spawn candidate at a random edge
                 edge = random.choice(self.edges)
-                speed = random.randint(*STARTING_SPEED_SPREAD)
+                speed = random.randint(*asteroids.STARTING_SPEED_SPREAD)
                 velocity = edge[0] * speed
                 velocity = velocity.rotate(random.randint(-30, 30))
                 position = edge[1](random.uniform(0, 1))
-                radius = random.randint(1, SIZES) * MIN_RADIUS
+                radius = random.randint(1, asteroids.SIZES) * asteroids.MIN_RADIUS
                 temp_asteroid = CircleShape(position, radius)
                 temp_asteroid.velocity = velocity
 
