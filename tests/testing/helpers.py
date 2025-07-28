@@ -1,17 +1,22 @@
 # Mock/Test Double Objects
+
+from __future__ import annotations
+
 import math
 from contextlib import contextmanager
 from enum import Enum
 from types import ModuleType
-from typing import Any, Iterator, Optional
+from typing import Any, Iterator, Optional, Sequence, TypeVar
 
 import pygame
 
 from settings import asteroids
 from src.asteroid_sprite import Asteroid
+from src.asteroidfield import AsteroidField
 from tests.testing.scenarios import (SplitAsteroidScenario,
                                      UpdateAsteroidScenario)
 
+T = TypeVar('T')
 
 class MockGameColors(str, Enum):
     """Test version of GameColors with known values for testing."""
@@ -40,6 +45,21 @@ def create_test_asteroid(
     if position is None:
         position = pygame.Vector2(100, 100)
     return Asteroid(position, radius, is_fragment)
+
+def create_test_asteroid_field(
+    vulnerable_asteroids_group: Optional[pygame.sprite.Group[Any]] = None,
+    invulnerable_asteroids_group: Optional[pygame.sprite.Group[Any]] = None,
+):
+    """Factory function for creating test asteroid fields with default values."""
+    if vulnerable_asteroids_group is None:
+        vulnerable_asteroids_group = pygame.sprite.Group()
+    if invulnerable_asteroids_group is None:
+        invulnerable_asteroids_group = pygame.sprite.Group()
+    
+    return AsteroidField(
+        vulnerable_asteroids_group=vulnerable_asteroids_group,
+        invulnerable_asteroids_group=invulnerable_asteroids_group,
+    )
 
 # def create_test_player():
 #     pass
@@ -164,3 +184,7 @@ def make_split_scenario(
         expected_new_positions=expected_new_positions,
         expected_new_velocities=expected_new_velocities,
     )
+
+def mock_first_choice(options: Sequence[T]) -> T:
+    """Mock random.choice that always returns the first option."""
+    return options[0]
