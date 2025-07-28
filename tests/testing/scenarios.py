@@ -1,4 +1,7 @@
 # tests/testing/scenarios.py
+
+from __future__ import annotations
+
 from contextlib import nullcontext
 from dataclasses import dataclass, field
 from typing import Any, Callable, Generic, Optional, TypeVar, cast
