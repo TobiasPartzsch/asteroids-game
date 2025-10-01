@@ -122,7 +122,7 @@ class TestAsteroidfieldUnit(unittest.TestCase):
             override_settings(
                 asteroids,
                 SPAWN_RATE_GROWTH=asteroids.GrowthSetting(
-                    function_type=asteroids.GrowthFunction.EXPONETIAL,
+                    function_type=asteroids.GrowthFunction.EXPONENTIAL,
                     coefficients=(1.0, 0.1)  # 1.0 * exp(0.1*t)
                 )
             ),

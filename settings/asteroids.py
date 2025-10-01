@@ -1,6 +1,6 @@
+import math
 from dataclasses import dataclass
 from enum import Enum, auto
-import math
 
 from src.collision_behaviors import CollisionBehavior
 
@@ -19,7 +19,7 @@ class GrowthFunction(Enum):
        Must contain at least one coefficient (k).
        Example: (1.0, 2.0, 3.0) for 1.0*x^2 + 2.0*x + 3.0 (if x is time).
     """
-    EXPONETIAL = auto()
+    EXPONENTIAL = auto()
     """Represents an exponential growth function ae^(bx).
        
        Expected coefficients: ExponentialCoefficients (Tuple[float, float]).
@@ -56,7 +56,7 @@ class GrowthFunction(Enum):
                     multiplier += coeff * (time ** power)
                 return multiplier
 
-            case GrowthFunction.EXPONETIAL:
+            case GrowthFunction.EXPONENTIAL:
                 # Specific checks for Exponential
                 if len(coefficients) != 2:
                     raise ValueError(
@@ -82,31 +82,35 @@ class GrowthSetting:
 
 # Shape
 MIN_RADIUS = 20.0
-SIZES = 5  # Number of size tiers, size works as a multiplier on MIN_RADIUS
+SIZES = 2  # Number of size tiers, size works as a multiplier on MIN_RADIUS
 MAX_RADIUS = MIN_RADIUS * SIZES  # Maximum radius for the largest asteroid tier
 
 # Spawning
+# SPAWN_RATE_GROWTH = GrowthSetting(
+#     function_type=GrowthFunction.POLYNOMIAL,
+#     coefficients=(0.1, 2.0)
+# )  # spawns per second
 SPAWN_RATE_GROWTH = GrowthSetting(
     function_type=GrowthFunction.POLYNOMIAL,
-    coefficients=(0.1, 2.0)
+    coefficients=(0.3, 0.1)
 )  # spawns per second
 STARTING_SPEED_SPREAD = (40, 100)  # Range (min, max) of initial speeds for newly spawned asteroids (pixels/sec)
 SPEED_GROWTH = GrowthSetting(
-    function_type=GrowthFunction.EXPONETIAL,
-    coefficients=(1.0, 0.03,)
-)  # multiplier on speed of new fragments on split
+    function_type=GrowthFunction.POLYNOMIAL,
+    coefficients=(0.1, 0.03,)
+)  # multiplier on speed of asteroids over time
 SPAWN_INVUL_TIME_IN_SEC = 1.0
 MAX_SPAWN_ATTEMPTS = 30  # trade-off between performance (low values) and having a chance to spawn in a crowded field (high values)
 
 # Splitting
-SPLIT_SPEEDUP = 1
-SPLIT_DIRECTIONS = (-1, 1)  # multipliers on the random split rotation angle
+SPLIT_SPEEDUP = 1.0
+SPLIT_DIRECTIONS = (-1, 0, 1)  # multipliers on the random split rotation angle
 # other examples (-0.5, 0, 0.5) # (-1, -0.5, 0, 0.5, 1,)
 SPLIT_ANGLE = (10, 45)
 
 # Collision
-COLLISION_ENABLED = True  # Master switch for asteroid-asteroid collisions, not fully implemented
-ON_COLLISION = CollisionBehavior.DELETE  # Behavior when two asteroids collide
+COLLISION_ENABLED = False  # Master switch for asteroid-asteroid collisions, not fully implemented
+ON_COLLISION = CollisionBehavior.BOUNCE  # Behavior when two asteroids collide
 
 # Visual
 BORDER_WIDTH_INVULNERABLE_MULTIPLIER = 4

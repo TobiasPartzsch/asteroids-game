@@ -313,7 +313,7 @@ class TestAsteroidSpriteUnit(unittest.TestCase):
                 initial_position=pygame.Vector2(40, 0),
                 initial_velocity=pygame.Vector2(-15, 0),
                 dt=0.5,
-                growth_function=asteroids.GrowthFunction.EXPONETIAL,
+                growth_function=asteroids.GrowthFunction.EXPONENTIAL,
                 coefficients=(1.0, 0.04),  # Multiplier: 1.0 * exp(0.04*t)
                 game_time=5.0,
             ),
@@ -322,7 +322,7 @@ class TestAsteroidSpriteUnit(unittest.TestCase):
                 initial_position=pygame.Vector2(0, 40),
                 initial_velocity=pygame.Vector2(0, -5),
                 dt=1.0,
-                growth_function=asteroids.GrowthFunction.EXPONETIAL,
+                growth_function=asteroids.GrowthFunction.EXPONENTIAL,
                 coefficients=(0.8, 0.01),
                 game_time=5.0,
             ),
